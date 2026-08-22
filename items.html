@@ -630,7 +630,7 @@
 
 <script>
 (function () {
-  var STORAGE_KEY = "birth-prep-items-v7";
+  var STORAGE_KEY = "birth-prep-items-v8";
   var CATEGORIES = ["장비", "아기 의류", "침구", "수유용품", "위생·케어", "장난감·발달", "병원가방·의류", "병원가방·수유", "병원가방·위생·의약품", "병원가방·기타", "산모 회복 용품", "집안 준비", "기타"];
 
   var defaults = [
@@ -935,16 +935,21 @@
     ["집안 준비", "아기 옷 건조대", 1, "선택", "", ""],
     ["집안 준비", "산모 도우미/방문 일정 조율", 1, "필수", "", "친정·시댁과 일정 미리 협의"]
   ].map(function (row, i) {
-    var brands = row[6] ? row[6].map(function (b) {
-      return { name: b[0], cost: b[1] === "" ? null : Number(b[1]), note: b[2] };
-    }) : null;
+    var brands = row[6]
+      ? row[6].map(function (b) {
+          return { name: b[0], cost: b[1] === "" ? null : Number(b[1]), note: b[2] };
+        }).concat([{ name: "미정", cost: 0, note: "" }])
+      : [
+          { name: "확정", cost: row[4] === "" ? null : Number(row[4]), note: "" },
+          { name: "미정", cost: 0, note: "" }
+        ];
     return {
       id: "seed-" + i,
       category: row[0],
       name: row[1],
       qty: row[2],
       priority: row[3],
-      cost: brands ? brands[0].cost : (row[4] === "" ? null : Number(row[4])),
+      cost: brands[0].cost,
       note: row[5],
       brands: brands,
       brandIndex: 0,
