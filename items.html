@@ -348,13 +348,30 @@
 
   .item-row {
     display: grid;
-    grid-template-columns: 26px 1.8fr 60px 90px 1fr 90px 30px;
+    grid-template-columns: 26px 1.5fr 1fr 55px 80px 95px 26px;
     gap: 12px;
     align-items: center;
     padding: 11px 16px;
     border-bottom: 1px solid var(--line);
     font-size: 14px;
   }
+
+  .item-row-head {
+    display: grid;
+    grid-template-columns: 26px 1.5fr 1fr 55px 80px 95px 26px;
+    gap: 12px;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--line);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+    background: var(--surface-alt);
+  }
+
+  .item-row-head span:first-child { grid-column: 1 / span 2; }
+  .item-row-head span:nth-child(5) { text-align: right; }
 
   .item-row:last-child { border-bottom: none; }
 
@@ -395,9 +412,10 @@
   .item-name { font-weight: 500; }
   .item-note { display: block; color: var(--ink-soft); font-size: 12.5px; margin-top: 2px; font-weight: 400; }
 
+  .item-brand-cell { min-width: 0; }
+
   .brand-select {
-    display: block;
-    margin-top: 6px;
+    width: 100%;
     font-family: "Work Sans", sans-serif;
     font-size: 12.5px;
     font-weight: 500;
@@ -405,11 +423,18 @@
     background: var(--accent-soft);
     border: 1px solid transparent;
     border-radius: 6px;
-    padding: 4px 8px;
+    padding: 5px 8px;
     cursor: pointer;
   }
 
   .brand-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .no-brand {
+    color: var(--ink-faint);
+    font-size: 13px;
+    text-align: center;
+    display: block;
+  }
 
   .brand-note {
     display: block;
@@ -498,15 +523,18 @@
 
   @media (max-width: 760px) {
     .add-grid { grid-template-columns: 1fr 1fr; }
+    .item-row-head { display: none; }
     .item-row {
       grid-template-columns: 22px 1fr auto;
       grid-template-areas:
         "check name del"
+        "check brand brand"
         "check meta meta";
     }
     .item-row .item-check { grid-area: check; }
     .item-row .item-name-wrap { grid-area: name; }
     .item-row .item-del { grid-area: del; }
+    .item-row .item-brand-cell { grid-area: brand; }
     .item-row .item-qty, .item-row .priority-badge, .item-row .item-cost { grid-area: meta; }
   }
 
@@ -898,6 +926,11 @@
         empty.className = "empty-note";
         empty.textContent = "표시할 항목이 없습니다.";
         card.appendChild(empty);
+      } else {
+        var head = document.createElement("div");
+        head.className = "item-row-head";
+        head.innerHTML = "<span>이름</span><span>브랜드</span><span>수량</span><span>우선순위</span><span>비용</span><span></span>";
+        card.appendChild(head);
       }
 
       catItems.forEach(function (item) {
@@ -927,6 +960,8 @@
           nameWrap.appendChild(noteEl);
         }
 
+        var brandCell = document.createElement("div");
+        brandCell.className = "item-brand-cell";
         if (item.brands) {
           var brandSelect = document.createElement("select");
           brandSelect.className = "brand-select";
@@ -943,7 +978,7 @@
             save();
             renderAll();
           });
-          nameWrap.appendChild(brandSelect);
+          brandCell.appendChild(brandSelect);
 
           var brandNote = item.brands[item.brandIndex].note;
           if (brandNote) {
@@ -952,6 +987,8 @@
             brandNoteEl.textContent = "💡 " + brandNote;
             nameWrap.appendChild(brandNoteEl);
           }
+        } else {
+          brandCell.innerHTML = '<span class="no-brand">—</span>';
         }
 
         var qtyEl = document.createElement("div");
@@ -992,10 +1029,10 @@
 
         row.appendChild(check);
         row.appendChild(nameWrap);
+        row.appendChild(brandCell);
         row.appendChild(qtyEl);
         row.appendChild(badge);
         row.appendChild(costWrap);
-        row.appendChild(document.createElement("div"));
         row.appendChild(del);
         card.appendChild(row);
       });
