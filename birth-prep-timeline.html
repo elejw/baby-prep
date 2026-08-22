@@ -79,6 +79,54 @@
     margin: 0;
   }
 
+  /* ---------- site nav ---------- */
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 20px;
+    margin-bottom: 36px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .nav-brand {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 6px;
+  }
+
+  .nav-link {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    color: var(--ink-soft);
+    padding: 7px 13px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+  }
+
+  .nav-link:hover {
+    color: var(--ink);
+    border-color: var(--line);
+  }
+
+  .nav-link.active {
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    font-weight: 500;
+  }
+
   /* ---------- header ---------- */
 
   .eyebrow {
@@ -439,6 +487,14 @@
 </style>
 
 <div class="page">
+
+  <nav class="site-nav">
+    <a class="nav-brand" href="./birth-prep-timeline.html">🍼 출산 준비</a>
+    <div class="nav-links">
+      <a class="nav-link active" href="./birth-prep-timeline.html">타임라인</a>
+      <a class="nav-link" href="./items.html">준비물</a>
+    </div>
+  </nav>
 
   <header class="hero">
     <div class="eyebrow">첫 아이 · 한국 거주 기준</div>

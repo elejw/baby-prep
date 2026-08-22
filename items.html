@@ -1,0 +1,836 @@
+<title>준비물 관리</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #f3f4ef;
+    --surface: #ffffff;
+    --surface-alt: #eaede4;
+    --ink: #22261f;
+    --ink-soft: #5c6152;
+    --ink-faint: #8b9080;
+    --line: #dcdfd3;
+    --accent: #2f6e62;
+    --accent-strong: #204e45;
+    --accent-soft: #dceae5;
+    --highlight: #c97a2e;
+    --highlight-soft: #f3e2c9;
+    --danger: #b6482f;
+    --danger-soft: #f5e0d8;
+    --shadow: 0 1px 2px rgba(34,38,31,0.06), 0 8px 24px -12px rgba(34,38,31,0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121615;
+      --surface: #1a201e;
+      --surface-alt: #212824;
+      --ink: #edeee6;
+      --ink-soft: #aab0a0;
+      --ink-faint: #737a6c;
+      --line: #2b3330;
+      --accent: #74bda8;
+      --accent-strong: #a3d6c5;
+      --accent-soft: #1e2f2b;
+      --highlight: #e8a565;
+      --highlight-soft: #382a1a;
+      --danger: #e08668;
+      --danger-soft: #392620;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #121615;
+    --surface: #1a201e;
+    --surface-alt: #212824;
+    --ink: #edeee6;
+    --ink-soft: #aab0a0;
+    --ink-faint: #737a6c;
+    --line: #2b3330;
+    --accent: #74bda8;
+    --accent-strong: #a3d6c5;
+    --accent-soft: #1e2f2b;
+    --highlight: #e8a565;
+    --highlight-soft: #382a1a;
+    --danger: #e08668;
+    --danger-soft: #392620;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Work Sans", "Segoe UI", sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 56px 24px 100px;
+  }
+
+  h1, h2, h3 {
+    font-family: "Fraunces", Georgia, serif;
+    text-wrap: balance;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* ---------- site nav ---------- */
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 20px;
+    margin-bottom: 36px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .nav-brand {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 6px;
+  }
+
+  .nav-link {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    color: var(--ink-soft);
+    padding: 7px 13px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+  }
+
+  .nav-link:hover {
+    color: var(--ink);
+    border-color: var(--line);
+  }
+
+  .nav-link.active {
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    font-weight: 500;
+  }
+
+  /* ---------- header ---------- */
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  header.hero { margin-bottom: 32px; }
+
+  header.hero h1 {
+    font-size: clamp(28px, 5vw, 38px);
+    font-weight: 600;
+    margin-top: 10px;
+    letter-spacing: -0.01em;
+  }
+
+  header.hero p.sub {
+    margin-top: 12px;
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 16px;
+  }
+
+  /* ---------- progress ---------- */
+
+  .progress-panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .progress-stat .num {
+    font-family: "IBM Plex Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--accent-strong);
+  }
+
+  .progress-stat .label {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .progress-bar-track {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--surface-alt);
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+
+  .progress-bar-caption {
+    margin-top: 6px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-family: "IBM Plex Mono", monospace;
+  }
+
+  /* ---------- controls ---------- */
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 28px 0 20px;
+  }
+
+  .chip {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  .chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+    font-weight: 500;
+  }
+
+  .hide-toggle {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .hide-toggle input { accent-color: var(--accent); }
+
+  /* ---------- add form ---------- */
+
+  .add-form {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 32px;
+  }
+
+  .add-form h2 {
+    font-size: 15.5px;
+    font-weight: 600;
+  }
+
+  .add-grid {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 0.7fr 1fr 0.9fr 1.6fr auto;
+    gap: 10px;
+    margin-top: 14px;
+    align-items: end;
+  }
+
+  .field label {
+    display: block;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    margin-bottom: 5px;
+    font-family: "IBM Plex Mono", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    font-family: "Work Sans", sans-serif;
+    font-size: 14px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  .field input:focus, .field select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .add-btn {
+    font-family: "Work Sans", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: var(--bg);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .add-btn:hover { background: var(--accent-strong); }
+
+  /* ---------- category groups ---------- */
+
+  .cat-section { margin-bottom: 30px; }
+
+  .cat-title {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .cat-title .count {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--ink-faint);
+  }
+
+  .item-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .item-row {
+    display: grid;
+    grid-template-columns: 26px 1.8fr 60px 90px 1fr 90px 30px;
+    gap: 12px;
+    align-items: center;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+
+  .item-row:last-child { border-bottom: none; }
+
+  .item-row.done {
+    background: var(--surface-alt);
+  }
+
+  .item-row.done .item-name { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--line); }
+
+  .item-check {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--ink-faint);
+    border-radius: 5px;
+    cursor: pointer;
+    position: relative;
+    background: var(--surface);
+  }
+
+  .item-check:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .item-check:checked::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid var(--bg);
+    border-width: 0 2px 2px 0;
+    transform: rotate(40deg);
+  }
+
+  .item-name { font-weight: 500; }
+  .item-note { display: block; color: var(--ink-soft); font-size: 12.5px; margin-top: 2px; font-weight: 400; }
+
+  .item-qty {
+    font-family: "IBM Plex Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  .priority-badge {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .priority-필수 { background: var(--highlight-soft); color: var(--highlight); }
+  .priority-선택 { background: var(--surface-alt); color: var(--ink-faint); }
+
+  .item-cost {
+    font-family: "IBM Plex Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+    font-size: 13px;
+  }
+
+  .item-cost input {
+    width: 100%;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--ink-soft);
+    padding: 4px 6px;
+    border-radius: 6px;
+    text-align: right;
+  }
+
+  .item-cost input:hover, .item-cost input:focus {
+    border-color: var(--line);
+    background: var(--bg);
+    outline: none;
+  }
+
+  .item-del {
+    border: none;
+    background: transparent;
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 4px;
+    border-radius: 6px;
+  }
+
+  .item-del:hover { color: var(--danger); background: var(--danger-soft); }
+
+  .empty-note {
+    color: var(--ink-faint);
+    font-size: 13.5px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 760px) {
+    .add-grid { grid-template-columns: 1fr 1fr; }
+    .item-row {
+      grid-template-columns: 22px 1fr auto;
+      grid-template-areas:
+        "check name del"
+        "check meta meta";
+    }
+    .item-row .item-check { grid-area: check; }
+    .item-row .item-name-wrap { grid-area: name; }
+    .item-row .item-del { grid-area: del; }
+    .item-row .item-qty, .item-row .priority-badge, .item-row .item-cost { grid-area: meta; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div class="page">
+
+  <nav class="site-nav">
+    <a class="nav-brand" href="./birth-prep-timeline.html">🍼 출산 준비</a>
+    <div class="nav-links">
+      <a class="nav-link" href="./birth-prep-timeline.html">타임라인</a>
+      <a class="nav-link active" href="./items.html">준비물</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="eyebrow">전체 준비물 관리</div>
+    <h1>준비물 체크리스트</h1>
+    <p class="sub">병원 가방·신생아 용품·산모 회복 용품·집안 준비까지 전체 준비물을 한곳에서 관리합니다. 완료 표시, 수량·비용 메모, 새 항목 추가가 모두 이 브라우저에 저장됩니다.</p>
+  </header>
+
+  <div class="progress-panel">
+    <div class="progress-stat"><div class="num" id="stat-total">0</div><div class="label">전체 항목</div></div>
+    <div class="progress-stat"><div class="num" id="stat-done">0</div><div class="label">완료</div></div>
+    <div class="progress-stat"><div class="num" id="stat-cost">0원</div><div class="label">예상 총비용</div></div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="progress-bar-caption" id="progress-caption">0 / 0 완료</div>
+    </div>
+  </div>
+
+  <div class="add-form">
+    <h2>새 준비물 추가</h2>
+    <form id="add-item-form">
+      <div class="add-grid">
+        <div class="field">
+          <label for="f-name">이름</label>
+          <input id="f-name" type="text" placeholder="예: 아기 손톱깎이" required>
+        </div>
+        <div class="field">
+          <label for="f-category">카테고리</label>
+          <select id="f-category">
+            <option>병원 가방</option>
+            <option>신생아 용품</option>
+            <option>산모 회복 용품</option>
+            <option>집안 준비</option>
+            <option>기타</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-qty">수량</label>
+          <input id="f-qty" type="number" min="1" value="1">
+        </div>
+        <div class="field">
+          <label for="f-priority">우선순위</label>
+          <select id="f-priority">
+            <option>필수</option>
+            <option>선택</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-cost">예상비용</label>
+          <input id="f-cost" type="number" min="0" step="1000" placeholder="원">
+        </div>
+        <div class="field">
+          <label for="f-note">메모</label>
+          <input id="f-note" type="text" placeholder="선택 입력">
+        </div>
+        <button type="submit" class="add-btn">추가</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="controls" id="category-chips"></div>
+
+  <div id="item-groups"></div>
+
+  <footer>
+    체크·추가·비용 입력은 이 브라우저의 로컬 저장소에만 저장되며 다른 기기와 공유되지 않습니다. 삭제한 항목은 되돌릴 수 없으니 주의해주세요.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var STORAGE_KEY = "birth-prep-items-v1";
+  var CATEGORIES = ["병원 가방", "신생아 용품", "산모 회복 용품", "집안 준비", "기타"];
+
+  var defaults = [
+    ["병원 가방", "산모수첩", 1, "필수", "", ""],
+    ["병원 가방", "신분증", 1, "필수", "", ""],
+    ["병원 가방", "건강보험증 / 국민행복카드", 1, "필수", "", ""],
+    ["병원 가방", "수유 가능한 잠옷·카디건", 1, "필수", "", ""],
+    ["병원 가방", "산모 패드", 1, "필수", "", ""],
+    ["병원 가방", "수유브라", 1, "필수", "", ""],
+    ["병원 가방", "개인 세면도구", 1, "필수", "", ""],
+    ["병원 가방", "배냇저고리·속싸개 여벌", 1, "필수", "", ""],
+    ["병원 가방", "기저귀 여유분", 1, "선택", "", "병원 비치 여부 확인"],
+    ["병원 가방", "카시트", 1, "필수", "", "퇴원 시 필수"],
+    ["병원 가방", "아기 외출복 한 벌", 1, "필수", "", ""],
+    ["병원 가방", "휴대폰 충전기", 1, "필수", "", ""],
+    ["병원 가방", "보호자 여벌 옷·세면도구", 1, "선택", "", ""],
+    ["신생아 용품", "카시트", 1, "필수", "", ""],
+    ["신생아 용품", "유모차", 1, "필수", "", "신생아 등받이 각도 확인"],
+    ["신생아 용품", "아기 침대 또는 범퍼침대", 1, "필수", "", ""],
+    ["신생아 용품", "속싸개", 3, "필수", "", ""],
+    ["신생아 용품", "기저귀(신생아용)", 1, "필수", "", ""],
+    ["신생아 용품", "물티슈", 1, "필수", "", ""],
+    ["신생아 용품", "기저귀 크림", 1, "선택", "", ""],
+    ["신생아 용품", "젖병·젖꼭지", 1, "필수", "", ""],
+    ["신생아 용품", "분유(비상용)", 1, "선택", "", "모유 수유 계획과 무관하게 비상용 권장"],
+    ["신생아 용품", "젖병 소독기", 1, "선택", "", ""],
+    ["신생아 용품", "배냇저고리·바디수트", 6, "필수", "", ""],
+    ["신생아 용품", "손싸개·양말", 3, "필수", "", ""],
+    ["신생아 용품", "아기 욕조", 1, "필수", "", ""],
+    ["신생아 용품", "체온계", 1, "필수", "", ""],
+    ["신생아 용품", "유아용 손톱가위", 1, "선택", "", ""],
+    ["산모 회복 용품", "산모패드(대형)", 1, "필수", "", ""],
+    ["산모 회복 용품", "산모패드(중형)", 1, "필수", "", ""],
+    ["산모 회복 용품", "산모용 속옷", 1, "필수", "", ""],
+    ["산모 회복 용품", "좌욕기", 1, "선택", "", ""],
+    ["산모 회복 용품", "회음부 방석(도넛 쿠션)", 1, "선택", "", ""],
+    ["산모 회복 용품", "수유브라", 2, "필수", "", ""],
+    ["산모 회복 용품", "수유패드", 1, "필수", "", ""],
+    ["산모 회복 용품", "유두보호크림", 1, "선택", "", ""],
+    ["산모 회복 용품", "복대", 1, "선택", "", "제왕절개 시 별도 제품 필요"],
+    ["산모 회복 용품", "압박스타킹", 1, "선택", "", ""],
+    ["산모 회복 용품", "산후 조리용 실내복", 2, "필수", "", ""],
+    ["산모 회복 용품", "보온 양말", 3, "선택", "", ""],
+    ["집안 준비", "아기 침대·기저귀교환대 배치", 1, "필수", "", "동선 고려해서 배치"],
+    ["집안 준비", "온습도계", 1, "선택", "", ""],
+    ["집안 준비", "가습기", 1, "선택", "", ""],
+    ["집안 준비", "콘센트 커버 등 안전장치", 1, "선택", "", ""],
+    ["집안 준비", "아기 전용 세제", 1, "필수", "", ""],
+    ["집안 준비", "아기 옷 건조대", 1, "선택", "", ""],
+    ["집안 준비", "산모 도우미/방문 일정 조율", 1, "필수", "", "친정·시댁과 일정 미리 협의"]
+  ].map(function (row, i) {
+    return {
+      id: "seed-" + i,
+      category: row[0],
+      name: row[1],
+      qty: row[2],
+      priority: row[3],
+      cost: row[4] === "" ? null : Number(row[4]),
+      note: row[5],
+      done: false
+    };
+  });
+
+  var items = [];
+  try {
+    var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    items = Array.isArray(saved) ? saved : defaults;
+  } catch (e) {
+    items = defaults;
+  }
+
+  var activeFilter = "전체";
+  var hideDone = false;
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch (e) {}
+  }
+
+  function fmtWon(n) {
+    if (!n) return "-";
+    return n.toLocaleString("ko-KR") + "원";
+  }
+
+  function renderStats() {
+    var total = items.length;
+    var done = items.filter(function (i) { return i.done; }).length;
+    var totalCost = items.reduce(function (sum, i) { return sum + (i.cost || 0) * (i.qty || 1); }, 0);
+    document.getElementById("stat-total").textContent = total;
+    document.getElementById("stat-done").textContent = done;
+    document.getElementById("stat-cost").textContent = totalCost.toLocaleString("ko-KR") + "원";
+    var pct = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById("progress-fill").style.width = pct + "%";
+    document.getElementById("progress-caption").textContent = done + " / " + total + " 완료 (" + pct + "%)";
+  }
+
+  function renderChips() {
+    var wrap = document.getElementById("category-chips");
+    wrap.innerHTML = "";
+    var cats = ["전체"].concat(CATEGORIES);
+    cats.forEach(function (cat) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip" + (cat === activeFilter ? " active" : "");
+      btn.textContent = cat;
+      btn.addEventListener("click", function () {
+        activeFilter = cat;
+        renderAll();
+      });
+      wrap.appendChild(btn);
+    });
+    var hideWrap = document.createElement("label");
+    hideWrap.className = "hide-toggle";
+    hideWrap.innerHTML = '<input type="checkbox" id="hide-done-toggle"> 완료 항목 숨기기';
+    wrap.appendChild(hideWrap);
+    document.getElementById("hide-done-toggle").checked = hideDone;
+    document.getElementById("hide-done-toggle").addEventListener("change", function (e) {
+      hideDone = e.target.checked;
+      renderAll();
+    });
+  }
+
+  function renderGroups() {
+    var container = document.getElementById("item-groups");
+    container.innerHTML = "";
+    var cats = activeFilter === "전체" ? CATEGORIES : [activeFilter];
+
+    cats.forEach(function (cat) {
+      var catItems = items.filter(function (i) {
+        return i.category === cat && (!hideDone || !i.done);
+      });
+      if (items.filter(function (i) { return i.category === cat; }).length === 0) return;
+
+      var section = document.createElement("div");
+      section.className = "cat-section";
+
+      var doneInCat = items.filter(function (i) { return i.category === cat && i.done; }).length;
+      var totalInCat = items.filter(function (i) { return i.category === cat; }).length;
+
+      var titleHtml = document.createElement("div");
+      titleHtml.className = "cat-title";
+      titleHtml.innerHTML = cat + ' <span class="count">' + doneInCat + ' / ' + totalInCat + '</span>';
+      section.appendChild(titleHtml);
+
+      var card = document.createElement("div");
+      card.className = "item-card";
+
+      if (catItems.length === 0) {
+        var empty = document.createElement("div");
+        empty.className = "empty-note";
+        empty.textContent = "표시할 항목이 없습니다.";
+        card.appendChild(empty);
+      }
+
+      catItems.forEach(function (item) {
+        var row = document.createElement("div");
+        row.className = "item-row" + (item.done ? " done" : "");
+
+        var check = document.createElement("input");
+        check.type = "checkbox";
+        check.className = "item-check";
+        check.checked = item.done;
+        check.addEventListener("change", function () {
+          item.done = check.checked;
+          save();
+          renderAll();
+        });
+
+        var nameWrap = document.createElement("div");
+        nameWrap.className = "item-name-wrap";
+        var nameEl = document.createElement("span");
+        nameEl.className = "item-name";
+        nameEl.textContent = item.name;
+        nameWrap.appendChild(nameEl);
+        if (item.note) {
+          var noteEl = document.createElement("span");
+          noteEl.className = "item-note";
+          noteEl.textContent = item.note;
+          nameWrap.appendChild(noteEl);
+        }
+
+        var qtyEl = document.createElement("div");
+        qtyEl.className = "item-qty";
+        qtyEl.textContent = "x" + item.qty;
+
+        var badge = document.createElement("div");
+        badge.className = "priority-badge priority-" + item.priority;
+        badge.textContent = item.priority;
+
+        var costWrap = document.createElement("div");
+        costWrap.className = "item-cost";
+        var costInput = document.createElement("input");
+        costInput.type = "number";
+        costInput.min = "0";
+        costInput.step = "1000";
+        costInput.placeholder = "원";
+        costInput.value = item.cost === null || item.cost === undefined ? "" : item.cost;
+        costInput.addEventListener("change", function () {
+          var v = parseInt(costInput.value, 10);
+          item.cost = isNaN(v) ? null : v;
+          save();
+          renderStats();
+        });
+        costWrap.appendChild(costInput);
+
+        var del = document.createElement("button");
+        del.type = "button";
+        del.className = "item-del";
+        del.setAttribute("aria-label", "삭제");
+        del.textContent = "×";
+        del.addEventListener("click", function () {
+          items = items.filter(function (i) { return i.id !== item.id; });
+          save();
+          renderAll();
+        });
+
+        row.appendChild(check);
+        row.appendChild(nameWrap);
+        row.appendChild(qtyEl);
+        row.appendChild(badge);
+        row.appendChild(costWrap);
+        row.appendChild(document.createElement("div"));
+        row.appendChild(del);
+        card.appendChild(row);
+      });
+
+      section.appendChild(card);
+      container.appendChild(section);
+    });
+  }
+
+  function renderAll() {
+    renderStats();
+    renderChips();
+    renderGroups();
+  }
+
+  document.getElementById("add-item-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = document.getElementById("f-name").value.trim();
+    if (!name) return;
+    var category = document.getElementById("f-category").value;
+    var qty = parseInt(document.getElementById("f-qty").value, 10) || 1;
+    var priority = document.getElementById("f-priority").value;
+    var costRaw = document.getElementById("f-cost").value;
+    var cost = costRaw === "" ? null : parseInt(costRaw, 10);
+    var note = document.getElementById("f-note").value.trim();
+
+    items.push({
+      id: "item-" + Date.now(),
+      category: category,
+      name: name,
+      qty: qty,
+      priority: priority,
+      cost: cost,
+      note: note,
+      done: false
+    });
+    save();
+    e.target.reset();
+    document.getElementById("f-qty").value = 1;
+    activeFilter = category;
+    renderAll();
+  });
+
+  renderAll();
+})();
+</script>
