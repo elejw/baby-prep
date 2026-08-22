@@ -177,10 +177,14 @@
   .progress-stat .num {
     font-family: "IBM Plex Mono", monospace;
     font-variant-numeric: tabular-nums;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 500;
     color: var(--accent-strong);
   }
+
+  .progress-stat .num.status-bought { color: var(--accent-strong); }
+  .progress-stat .num.status-planned { color: var(--highlight); }
+  .progress-stat .num.status-skip { color: var(--ink-faint); }
 
   .progress-stat .label {
     font-size: 12.5px;
@@ -348,7 +352,7 @@
 
   .item-row {
     display: grid;
-    grid-template-columns: 26px 1.5fr 1fr 55px 80px 95px 26px;
+    grid-template-columns: 92px 1.4fr 0.9fr 50px 75px 90px 26px;
     gap: 12px;
     align-items: center;
     padding: 11px 16px;
@@ -358,7 +362,7 @@
 
   .item-row-head {
     display: grid;
-    grid-template-columns: 26px 1.5fr 1fr 55px 80px 95px 26px;
+    grid-template-columns: 92px 1.4fr 0.9fr 50px 75px 90px 26px;
     gap: 12px;
     padding: 9px 16px;
     border-bottom: 1px solid var(--line);
@@ -370,44 +374,36 @@
     background: var(--surface-alt);
   }
 
-  .item-row-head span:first-child { grid-column: 1 / span 2; }
-  .item-row-head span:nth-child(5) { text-align: right; }
+  .item-row-head span:nth-child(6) { text-align: right; }
 
   .item-row:last-child { border-bottom: none; }
 
-  .item-row.done {
+  .item-row.status-bought {
     background: var(--surface-alt);
   }
 
-  .item-row.done .item-name { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--line); }
+  .item-row.status-bought .item-name { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--line); }
 
-  .item-check {
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    border: 1.5px solid var(--ink-faint);
-    border-radius: 5px;
+  .item-row.status-skip { opacity: 0.55; }
+  .item-row.status-skip .item-name { font-style: italic; }
+
+  .status-select {
+    width: 100%;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    font-weight: 500;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    padding: 5px 6px;
     cursor: pointer;
-    position: relative;
-    background: var(--surface);
+    text-align: center;
+    text-align-last: center;
   }
 
-  .item-check:checked {
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-
-  .item-check:checked::after {
-    content: "";
-    position: absolute;
-    left: 5px;
-    top: 1px;
-    width: 4px;
-    height: 8px;
-    border: solid var(--bg);
-    border-width: 0 2px 2px 0;
-    transform: rotate(40deg);
-  }
+  .status-select.status-planned { background: var(--highlight-soft); color: var(--highlight); }
+  .status-select.status-bought { background: var(--accent-soft); color: var(--accent-strong); }
+  .status-select.status-skip { background: var(--surface-alt); color: var(--ink-faint); }
+  .status-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
   .item-name { font-weight: 500; }
   .item-note { display: block; color: var(--ink-soft); font-size: 12.5px; margin-top: 2px; font-weight: 400; }
@@ -525,13 +521,13 @@
     .add-grid { grid-template-columns: 1fr 1fr; }
     .item-row-head { display: none; }
     .item-row {
-      grid-template-columns: 22px 1fr auto;
+      grid-template-columns: 76px 1fr auto;
       grid-template-areas:
-        "check name del"
-        "check brand brand"
-        "check meta meta";
+        "status name del"
+        "status brand brand"
+        "status meta meta";
     }
-    .item-row .item-check { grid-area: check; }
+    .item-row .item-status-cell { grid-area: status; }
     .item-row .item-name-wrap { grid-area: name; }
     .item-row .item-del { grid-area: del; }
     .item-row .item-brand-cell { grid-area: brand; }
@@ -556,13 +552,16 @@
   <header class="hero">
     <div class="eyebrow">전체 준비물 관리</div>
     <h1>준비물 체크리스트</h1>
-    <p class="sub">장비·의류·침구·수유·위생·장난감(아기용품)부터 병원가방, 산모 회복 용품, 집안 준비까지 — 실제로 아기를 키워본 분의 후기와 브랜드·가격 정보를 반영했습니다. 완료 표시, 수량·비용 메모, 새 항목 추가가 모두 이 브라우저에 저장됩니다.</p>
+    <p class="sub">장비·의류·침구·수유·위생·장난감(아기용품)부터 병원가방, 산모 회복 용품, 집안 준비까지 — 실제로 아기를 키워본 분의 후기와 브랜드·가격 정보를 반영했습니다. 구매완료·구매예정·구매 안함 상태 표시, 수량·비용 메모, 새 항목 추가가 모두 이 브라우저에 저장됩니다.</p>
   </header>
 
   <div class="progress-panel">
     <div class="progress-stat"><div class="num" id="stat-total">0</div><div class="label">전체 항목</div></div>
-    <div class="progress-stat"><div class="num" id="stat-done">0</div><div class="label">완료</div></div>
-    <div class="progress-stat"><div class="num" id="stat-cost">0원</div><div class="label">예상 총비용</div></div>
+    <div class="progress-stat"><div class="num status-bought" id="stat-bought">0</div><div class="label">구매완료</div></div>
+    <div class="progress-stat"><div class="num status-planned" id="stat-planned">0</div><div class="label">구매예정</div></div>
+    <div class="progress-stat"><div class="num status-skip" id="stat-skip">0</div><div class="label">구매 안함</div></div>
+    <div class="progress-stat"><div class="num" id="stat-spent">0원</div><div class="label">이미 지출</div></div>
+    <div class="progress-stat"><div class="num" id="stat-remaining">0원</div><div class="label">남은 예상비용</div></div>
     <div class="progress-bar-wrap">
       <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
       <div class="progress-bar-caption" id="progress-caption">0 / 0 완료</div>
@@ -631,7 +630,7 @@
 
 <script>
 (function () {
-  var STORAGE_KEY = "birth-prep-items-v5";
+  var STORAGE_KEY = "birth-prep-items-v6";
   var CATEGORIES = ["장비", "아기 의류", "침구", "수유용품", "위생·케어", "장난감·발달", "병원가방·의류", "병원가방·수유", "병원가방·위생·의약품", "병원가방·기타", "산모 회복 용품", "집안 준비", "기타"];
 
   var defaults = [
@@ -741,7 +740,7 @@
     ["수유용품", "분유포트", 1, "선택", 83700, "", [
       ["보르르", 83700, "2025년 인기 1위. 40~90도 1도 단위 온도조절로 정확함. 물을 가득 채우면(1.3L) 다소 무거워 손목에 부담될 수 있음"],
       ["라비킷", 168000, "4세대는 통분리세척 가능해 위생적. 출산선물로도 많이 오가는 브랜드지만 가격은 보르르보다 높음"],
-      ["릴리브", 139000, "자동출수형이라 손목 안 써도 됨, 100도로 끓인 뒤 설정온도까지 자동 냉각. '분유포트계의 에르메스'로 불릴 만큼 고가, 물에서 쇠맛 난다는 후기도 일부 있음"]
+      ["릴리브", 299000, "자동출수형이라 손목 안 써도 됨, 100도로 끓인 뒤 설정온도까지 자동 냉각. 정가 약 29.9만원(할인 시 19~22만원대)으로 '분유포트계의 에르메스'라 불릴 만큼 고가, 물에서 쇠맛 난다는 후기도 일부 있음"]
     ]],
     ["수유용품", "수유 쿠션", 1, "선택", 65000, "모유수유를 집에서 할 계획이면 꼭 필요", [
       ["쿠나 밀착 수유쿠션", 65000, "D자형에 11도 경사각과 허리벨트로 자세가 안정적이고 무게도 600g로 가벼움"],
@@ -949,7 +948,7 @@
       note: row[5],
       brands: brands,
       brandIndex: 0,
-      done: false
+      status: "planned"
     };
   });
 
@@ -962,7 +961,7 @@
   }
 
   var activeFilter = "전체";
-  var hideDone = false;
+  var onlyPlanned = false;
 
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch (e) {}
@@ -975,14 +974,23 @@
 
   function renderStats() {
     var total = items.length;
-    var done = items.filter(function (i) { return i.done; }).length;
-    var totalCost = items.reduce(function (sum, i) { return sum + (i.cost || 0) * (i.qty || 1); }, 0);
+    var bought = items.filter(function (i) { return i.status === "bought"; });
+    var planned = items.filter(function (i) { return i.status === "planned"; });
+    var skip = items.filter(function (i) { return i.status === "skip"; });
+    var spent = bought.reduce(function (sum, i) { return sum + (i.cost || 0) * (i.qty || 1); }, 0);
+    var remaining = planned.reduce(function (sum, i) { return sum + (i.cost || 0) * (i.qty || 1); }, 0);
+
     document.getElementById("stat-total").textContent = total;
-    document.getElementById("stat-done").textContent = done;
-    document.getElementById("stat-cost").textContent = totalCost.toLocaleString("ko-KR") + "원";
-    var pct = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById("stat-bought").textContent = bought.length;
+    document.getElementById("stat-planned").textContent = planned.length;
+    document.getElementById("stat-skip").textContent = skip.length;
+    document.getElementById("stat-spent").textContent = spent.toLocaleString("ko-KR") + "원";
+    document.getElementById("stat-remaining").textContent = remaining.toLocaleString("ko-KR") + "원";
+
+    var denom = total - skip.length;
+    var pct = denom ? Math.round((bought.length / denom) * 100) : 0;
     document.getElementById("progress-fill").style.width = pct + "%";
-    document.getElementById("progress-caption").textContent = done + " / " + total + " 완료 (" + pct + "%)";
+    document.getElementById("progress-caption").textContent = bought.length + " / " + denom + " 구매완료 (구매 안함 " + skip.length + "개 제외, " + pct + "%)";
   }
 
   function renderChips() {
@@ -1002,11 +1010,11 @@
     });
     var hideWrap = document.createElement("label");
     hideWrap.className = "hide-toggle";
-    hideWrap.innerHTML = '<input type="checkbox" id="hide-done-toggle"> 완료 항목 숨기기';
+    hideWrap.innerHTML = '<input type="checkbox" id="hide-done-toggle"> 구매예정만 보기';
     wrap.appendChild(hideWrap);
-    document.getElementById("hide-done-toggle").checked = hideDone;
+    document.getElementById("hide-done-toggle").checked = onlyPlanned;
     document.getElementById("hide-done-toggle").addEventListener("change", function (e) {
-      hideDone = e.target.checked;
+      onlyPlanned = e.target.checked;
       renderAll();
     });
   }
@@ -1018,19 +1026,19 @@
 
     cats.forEach(function (cat) {
       var catItems = items.filter(function (i) {
-        return i.category === cat && (!hideDone || !i.done);
+        return i.category === cat && (!onlyPlanned || i.status === "planned");
       });
       if (items.filter(function (i) { return i.category === cat; }).length === 0) return;
 
       var section = document.createElement("div");
       section.className = "cat-section";
 
-      var doneInCat = items.filter(function (i) { return i.category === cat && i.done; }).length;
+      var boughtInCat = items.filter(function (i) { return i.category === cat && i.status === "bought"; }).length;
       var totalInCat = items.filter(function (i) { return i.category === cat; }).length;
 
       var titleHtml = document.createElement("div");
       titleHtml.className = "cat-title";
-      titleHtml.innerHTML = cat + ' <span class="count">' + doneInCat + ' / ' + totalInCat + '</span>';
+      titleHtml.innerHTML = cat + ' <span class="count">' + boughtInCat + ' / ' + totalInCat + ' 구매완료</span>';
       section.appendChild(titleHtml);
 
       var card = document.createElement("div");
@@ -1044,23 +1052,31 @@
       } else {
         var head = document.createElement("div");
         head.className = "item-row-head";
-        head.innerHTML = "<span>이름</span><span>브랜드</span><span>수량</span><span>우선순위</span><span>비용</span><span></span>";
+        head.innerHTML = "<span>상태</span><span>이름</span><span>브랜드</span><span>수량</span><span>우선순위</span><span>비용</span><span></span>";
         card.appendChild(head);
       }
 
       catItems.forEach(function (item) {
         var row = document.createElement("div");
-        row.className = "item-row" + (item.done ? " done" : "");
+        row.className = "item-row status-" + item.status;
 
-        var check = document.createElement("input");
-        check.type = "checkbox";
-        check.className = "item-check";
-        check.checked = item.done;
-        check.addEventListener("change", function () {
-          item.done = check.checked;
+        var statusCell = document.createElement("div");
+        statusCell.className = "item-status-cell";
+        var statusSelect = document.createElement("select");
+        statusSelect.className = "status-select status-" + item.status;
+        [["planned", "구매예정"], ["bought", "구매완료"], ["skip", "구매 안함"]].forEach(function (opt) {
+          var o = document.createElement("option");
+          o.value = opt[0];
+          o.textContent = opt[1];
+          if (opt[0] === item.status) o.selected = true;
+          statusSelect.appendChild(o);
+        });
+        statusSelect.addEventListener("change", function () {
+          item.status = statusSelect.value;
           save();
           renderAll();
         });
+        statusCell.appendChild(statusSelect);
 
         var nameWrap = document.createElement("div");
         nameWrap.className = "item-name-wrap";
@@ -1142,7 +1158,7 @@
           renderAll();
         });
 
-        row.appendChild(check);
+        row.appendChild(statusCell);
         row.appendChild(nameWrap);
         row.appendChild(brandCell);
         row.appendChild(qtyEl);
@@ -1182,7 +1198,9 @@
       priority: priority,
       cost: cost,
       note: note,
-      done: false
+      brands: null,
+      brandIndex: 0,
+      status: "planned"
     });
     save();
     e.target.reset();
