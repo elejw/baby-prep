@@ -550,6 +550,103 @@
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
   }
+
+  /* ---------- brand-add modal ---------- */
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 100;
+  }
+
+  .modal-overlay.hidden { display: none; }
+
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px 26px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 8px 40px -8px rgba(0,0,0,0.4);
+  }
+
+  .modal-box h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .modal-item-name {
+    margin: 6px 0 18px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: "IBM Plex Mono", monospace;
+  }
+
+  .modal-box .field { margin-bottom: 14px; }
+
+  .modal-box .field label {
+    display: block;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    margin-bottom: 5px;
+    font-family: "IBM Plex Mono", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .modal-box .field input {
+    width: 100%;
+    font-family: "Work Sans", sans-serif;
+    font-size: 14.5px;
+    padding: 9px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  .modal-box .field input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .modal-btn {
+    font-family: "Work Sans", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .modal-btn-cancel {
+    background: var(--surface-alt);
+    color: var(--ink-soft);
+  }
+
+  .modal-btn-cancel:hover { background: var(--line); }
+
+  .modal-btn-add {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .modal-btn-add:hover { background: var(--accent-strong); }
 </style>
 
 <div class="page">
@@ -641,9 +738,30 @@
 
 </div>
 
+<div class="modal-overlay hidden" id="brand-modal-overlay">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="brand-modal-title">
+    <h3 id="brand-modal-title">브랜드 직접 추가</h3>
+    <p class="modal-item-name" id="brand-modal-item-name"></p>
+    <form id="brand-modal-form">
+      <div class="field">
+        <label for="brand-modal-name">브랜드/제품명</label>
+        <input id="brand-modal-name" type="text" placeholder="예: 무인양품" required autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="brand-modal-cost">예상비용 (원, 모르면 비워두세요)</label>
+        <input id="brand-modal-cost" type="number" min="0" step="1000" placeholder="원">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn modal-btn-cancel" id="brand-modal-cancel">취소</button>
+        <button type="submit" class="modal-btn modal-btn-add">추가</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 (function () {
-  var STORAGE_KEY = "birth-prep-items-v9";
+  var STORAGE_KEY = "birth-prep-items-v10";
   var CATEGORIES = ["장비", "아기 의류", "침구", "수유용품", "위생·케어", "장난감·발달", "병원가방·의류", "병원가방·수유", "병원가방·위생·의약품", "병원가방·기타", "산모 회복 용품", "집안 준비", "기타"];
 
   var defaults = [
@@ -656,7 +774,11 @@
     ["장비", "유모차 통풍시트", 1, "선택", 65000, "추천: 폴레드 에어러브3(단품가는 확인이 어려웠고 1+1 묶음 상품 위주로 판매되니 공식몰에서 재확인 권장). 여름아기는 바로 구매해도 좋음. 겨울엔 온열시트 추천(양면 온열·통풍 겸용 제품도 있음)"],
     ["장비", "풋머프·모기장", 1, "선택", "", "필요에 따라 추후 구매. 풋머프는 아기띠 워머로 대체 가능. 모기장은 유모차 호환되는 정품으로"],
     ["장비", "유모차 썬쉐이드", 1, "선택", "", "브랜드 이벤트 후기 작성 시 증정받는 경우도 있음"],
-    ["장비", "유모차(휴대용)", 1, "선택", "", "아기가 크고 나서 필요하면 직접 태워보고 구매 추천"],
+    ["장비", "유모차(휴대용)", 1, "선택", 105200, "아기가 크고 나서 필요하면 직접 태워보고 구매 추천. 가성비형(20~40만원대: 조이로·쿨키즈 등)과 프리미엄형(60~80만원대: 부가부·줄즈·리안 등)으로 나뉨", [
+      ["조이로 JR2", 105200, "6kg 초경량에 기내 반입 가능한 크기로 접혀서 10만원 미만 가성비 1순위로 꼽힘"],
+      ["부가부 버터플라이", 750000, "프리미엄 초경량 라인(해외가 기준, 국내는 수입 프리미엄 붙어 더 비쌀 수 있음). 원핸드 폴딩 등 마감이 고급스러움"],
+      ["에어보스 리머", "", "국내 브랜드로 리머·하이퍼 등 라인업 다양, 가성비와 프리미엄 사이 중간 옵션으로 언급됨(정확한 가격은 판매처 확인 필요)"]
+    ]],
     ["장비", "바구니 카시트", 1, "필수", 590000, "한국에서는 잠깐 쓰고 중고 처분하는 경우가 많지만 안전성은 바구니형이 제일 좋다는 평. 아기가 누운 자세라 나중에 카시트 거부가 심해질 수 있음", [
       ["싸이벡스 클라우드 티", 790000, "360도 회전형에 프리미엄 안전 인증으로 신뢰도가 높음. 셋 중 가격대가 가장 높음"],
       ["맥시코시 카브리오픽스", 350000, "오랜 스테디셀러라 유모차 어댑터 호환성이 넓음. 최신 i-Size 인증 여부는 모델별로 다르니 확인 필요"],
@@ -686,18 +808,18 @@
     ["장비", "아기띠 신생아 인서트", 1, "선택", 16800, "브랜드 예: 허그파파"],
     ["장비", "아기띠 패딩 코쿤", 1, "선택", 28000, "브랜드 예: 허그파파"],
     ["장비", "홈캠", 1, "필수", 143880, "", [
-      ["이글루", 143880, "국내 서버로 운영돼 해킹 등 보안 이슈에 상대적으로 안심할 수 있어 맘카페 신뢰도가 높음"],
+      ["이글루", 143880, "국내 서버로 운영돼 해킹 등 보안 이슈에 상대적으로 안심할 수 있어 맘카페 신뢰도가 높음(상위 신모델 S8도 출시됨, 지금 파는 건 대부분 S4 라인)", [["블로그 설치 후기", "https://mingbly.com/2025/10/27/%F0%9F%93%B7-%ED%99%88%EC%BA%A0-%EC%9D%B4%EA%B8%80%EB%A3%A8-s3-%EC%84%A4%EC%B9%98-%ED%9B%84%EA%B8%B0-%EC%95%84%EA%B8%B0-%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81%EC%9A%A9%EC%9C%BC%EB%A1%9C/"], ["비교 리뷰", "https://on.com2us.com/life/%ED%99%88%EC%BA%A0/"]]],
       ["타포(TP-Link Tapo)", "", "AI 울음감지·360도 회전 등 기능이 우수하고 리뷰도 많은 편(평점 4.8대). 서버가 해외(중국계) 소재라는 점은 유의"],
-      ["헤이홈", "", "50g대 초경량 설계로 설치가 간편, 보안성을 마케팅 포인트로 강조하는 국내 브랜드"]
+      ["헤이홈", "", "50g대 초경량 설계로 설치가 간편, 보안성을 마케팅 포인트로 강조하는 국내 브랜드", [["구매후기 게시판", "https://m.hej.life/skin-mobile5/board/product/read.html?no=92847&board_no=4&link_product_no=77&page=2"]]]
     ]],
     ["장비", "빨래건조대", 1, "선택", 40000, "이미 있으면 구매 불필요. 아기 전용 브랜드 경쟁보다 크기·재질·바퀴 유무가 더 중요한 카테고리", [
       ["한샘", 40000, "맘카페에서 빠짐없이 언급되는 스테디셀러. 바퀴가 달려 있어 이동이 편함"],
-      ["코멧", 20890, "오랜 업력의 전통 브랜드로 가격이 저렴한 편. 디자인은 한샘 대비 다소 투박함"]
+      ["코멧", 20890, "오랜 업력의 전통 브랜드로 가격이 저렴한 편. 디자인은 한샘 대비 다소 투박함", [["블로그 비교 후기", "https://dorishop.oopy.io/ca319a0e-67f5-4f20-b300-8cc308e74f8d"]]]
     ]],
     ["장비", "아기용품 수납장", 1, "선택", 142740, "", [
-      ["한샘 샘키즈", 142740, "국내 대표 가구 브랜드로 A/S·배송 인프라가 안정적임"],
-      ["현대리바트", "", "현대백화점 계열 브랜드로 3년 무상 A/S 제공, 한샘과 비슷한 가격대"],
-      ["이케아 트로파스트", "", "조합형 수납 시스템이라 아기 옷 정리에 특화, 가성비 좋으나 직접 조립해야 함"]
+      ["한샘 샘키즈", 142740, "국내 대표 가구 브랜드로 A/S·배송 인프라가 안정적임", [["블로그 후기", "https://www.keyzard.cc/ainarch/nb/224090916847"], ["리뷰 블로그", "https://mom-mom.net/itemsharings/628fa5900b56c05053f0706e"]]],
+      ["현대리바트", "", "현대백화점 계열 브랜드로 3년 무상 A/S 제공, 한샘과 비슷한 가격대", [["브랜드 리뷰", "https://www.hyundailivart.co.kr/ko/story/review/view.lvt?code=RE08&tsbSeq=1091"]]],
+      ["이케아 트로파스트", "", "조합형 수납 시스템이라 아기 옷 정리에 특화, 가성비 좋으나 직접 조립해야 함", [["커뮤니티 후기 모음", "https://ohou.se/cards/feed?query=%ED%8A%B8%EB%A1%9C%ED%8C%8C%EC%8A%A4%ED%8A%B8"]]]
     ]],
     ["아기 의류", "신생아 바디수트", 1, "필수", "", "추천: 유니클로. 반팔·나시 메쉬·코튼 바디수트 위주로. 기저귀를 자주 갈아서 바지는 거의 불필요"],
     ["아기 의류", "배냇저고리", 1, "필수", "", "병원·조리원에서 하나씩 주는 경우가 많음. 끈으로 묶는 것보다 똑딱이 배냇수트가 훨씬 편함"],
@@ -734,20 +856,20 @@
     ["침구", "원형 러그", 1, "선택", "", "❌ 사진 촬영용 정도로만 활용됨"],
     ["침구", "디데이 캘린더", 1, "선택", 9380, "포토 소품. 만삭사진 찍을 때도 활용 가능"],
     ["수유용품", "젖병", 1, "필수", 41800, "", [
-      ["더블하트", 25000, "국민템 젖병 브랜드로 타사 젖꼭지와도 호환이 잘 되는 편"],
-      ["닥터브라운", 17000, "배앓이 방지 설계(내부 벤트 시스템)로 유명해 예민한 아기에게 특히 추천됨"],
-      ["헤겐", 49000, "디자인이 예쁘고 세척이 편리하다는 평이 많지만 가격대가 있는 편"]
+      ["더블하트", 25000, "국민템 젖병 브랜드로 타사 젖꼭지와도 호환이 잘 되는 편(3세대 모유실감 라인이 현재 주력)", [["블로그 후기", "https://momstalk.hansnara.pe.kr/11251"], ["비교 블로그", "https://springjun.com/entry/%EC%8B%A0%EC%83%9D%EC%95%84-%EC%A0%96%EB%B3%91%EB%82%B4%EB%8F%84%EB%82%B4%EC%82%B0-5%EC%A2%85-%EC%82%AC%EC%9A%A9-%EC%86%94%EC%A7%81-%ED%9B%84%EA%B8%B0-%EB%B0%8F-%EC%B6%94%EC%B2%9C-BEST3"]]],
+      ["닥터브라운", 17000, "배앓이 방지 설계(내부 벤트 시스템)로 유명해 예민한 아기에게 특히 추천됨", [["유튜브 리뷰", "https://www.youtube.com/watch?v=OCRyhlk3Yf4"]]],
+      ["헤겐", 49000, "디자인이 예쁘고 세척이 편리하다는 평이 많지만 가격대가 있는 편", [["블로그 후기", "https://koreandiary.com/%ED%97%A4%EA%B2%90-%EC%A0%96%EB%B3%91-%ED%9B%84%EA%B8%B0-1%EB%85%84-%EC%A0%95%EB%8F%84-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B0-%EB%8A%90%EB%82%80-%EC%9E%A5%EB%8B%A8%EC%A0%90-%EC%82%B4%ED%8E%B4%EB%B3%B4/"]]]
     ]],
     ["수유용품", "쪽쪽이", 1, "선택", "", "월령별(0-3개월/3-6개월)로 구비. 아기마다 선호하는 모양이 다름", [
       ["피죤(더블하트)", "", "일본에서 흔히 구매하는 브랜드로 월령별 라인업이 있음. 아기마다 선호하는 모양이 달라 안 무는 경우도 있음"],
-      ["필립스 아벤트", 12900, "아기들이 잘 물기로 유명한 모델이라 처음 시도해보기 좋은 선택"]
+      ["필립스 아벤트", 12900, "아기들이 잘 물기로 유명한 모델이라 처음 시도해보기 좋은 선택", [["유튜브 리뷰", "https://www.youtube.com/watch?v=sBewfDjPtog"]]]
     ]],
     ["수유용품", "쪽쪽이 스트랩", 1, "선택", 4900, "예: 퍼기 실리콘 멀티스트랩"],
     ["수유용품", "쪽쪽이 케이스", 1, "선택", 10000, "구매 시 케이스가 함께 오는 경우도 많음"],
     ["수유용품", "분유", 1, "필수", "", "조리원 퇴소 전 구매. 맘카페 추천: 카브리타·산양·압타밀(푸로푸트라/A2) 등. 배앓이 있으면 소화 잘되는 Hipp 계열 고려"],
     ["수유용품", "분유 제조기", 1, "선택", 309000, "모유 수유가 어려울 경우 매우 유용. 분유수유 계획 있으면 중고라도 구매 추천. 깔때기 부품은 소모품이라 여분 구매 필요", [
-      ["베이비 브레짜", 309000, "국내에서 가장 많이 쓰이는 원조 제품이라 정보·후기가 풍부함. 세척을 소홀히 하면 노즐이 막혀 농도가 묽어질 수 있어 관리가 필요"],
-      ["브라비", 280000, "호주 브랜드로 실측 비교 시 소음이 55dB로 가장 조용했음. 농도 정확도는 '보통' 등급으로 평가됨"],
+      ["베이비 브레짜", 309000, "국내에서 가장 많이 쓰이는 원조 제품이라 정보·후기가 풍부함. 세척을 소홀히 하면 노즐이 막혀 농도가 묽어질 수 있어 관리가 필요(신형 '포뮬러 프로 어드밴스드'는 33.6만~45.4만원대)", [["블로그 리뷰", "https://kitle.xyz/post/167/"]]],
+      ["브라비", 280000, "호주 브랜드로 실측 비교 시 소음이 55dB로 가장 조용했음. 농도 정확도는 '보통' 등급으로 평가됨", [["유튜브 비교", "https://www.youtube.com/watch?v=7hkaOh1h6wI"]]],
       ["눈누", 142000, "셋 중 가격이 가장 저렴함. 산양분유와는 호환이 안 되고 거품이 약간 생긴다는 단점"]
     ]],
     ["수유용품", "분유포트", 1, "선택", 83700, "", [
@@ -790,28 +912,28 @@
     ["수유용품", "수유등", 1, "선택", "", "집에 무드등 있으면 대체 가능"],
     ["수유용품", "젖병 세척기", 1, "선택", "", "둘째 계획 있다면 강력 추천(경험담): 예 베이비 브레짜, 빨대컵까지 세척 가능하고 미세플라스틱 이슈 없는 모델. 식기세척기 있으면 안 사도 될 수 있음"],
     ["위생·케어", "신생아 욕조", 1, "필수", "", "한 달 정도만 쓰므로 중고로 저렴하게 구매 후 소독해서 사용 추천", [
-      ["센스2030", "", "저가 국민템으로 통 형태라 다용도로 오래 쓸 수 있음. 목받침이 없어 손으로 계속 받쳐줘야 하는 번거로움"],
-      ["스토케 플렉시바스", 95000, "접이식이라 수납이 편하고 서포트만 교체하면 신생아~4세까지 사용 가능. 가격대가 높은 편"],
-      ["온다베이비", 27000, "국내 중저가 브랜드로 등받이 각도조절 등 가성비가 좋음. 마감은 프리미엄 제품 대비 아쉬운 편"]
+      ["센스2030", "", "저가 국민템으로 통 형태라 다용도로 오래 쓸 수 있음. 목받침이 없어 손으로 계속 받쳐줘야 하는 번거로움", [["유튜브 비교", "https://www.youtube.com/watch?v=5hFlbSEeFi0"]]],
+      ["스토케 플렉시바스", 95000, "접이식이라 수납이 편하고 서포트만 교체하면 신생아~4세까지 사용 가능. 가격대가 높은 편", [["유튜브 리뷰", "https://www.youtube.com/watch?v=52ePQoGLMw0"], ["유튜브 리뷰2", "https://www.youtube.com/watch?v=U-kOXHIep_g"]]],
+      ["온다베이비", 27000, "국내 중저가 브랜드로 등받이 각도조절 등 가성비가 좋음. 마감은 프리미엄 제품 대비 아쉬운 편(상위 라인 '온다베이비 플러스'는 정가 8.4만원대)", [["유튜브 비교", "https://www.youtube.com/watch?v=KcriLmkOVn8"], ["블로그 비교", "https://write-info.com/79"]]]
     ]],
     ["위생·케어", "메인 욕조", 1, "필수", 40000, "중고 거래 활발", [
-      ["슈너글", 40000, "온도감지 플러그로 적정 수온을 바로 확인할 수 있고 배수도 편리함. 사이즈가 작아 돌 지나면 좁아진다는 후기"],
-      ["리안 드림콧 스탠드 욕조", "", "스탠드형이라 허리를 굽히지 않아도 되고 배수도 편함. 부피가 커서 공간을 많이 차지함"],
-      ["말랑하니 접이식 욕조", 38000, "폴딩 가능해 보관이 편하고 가격도 저렴함. 지지력은 슈너글보다 약하다는 후기"]
+      ["슈너글", 40000, "온도감지 플러그로 적정 수온을 바로 확인할 수 있고 배수도 편리함. 사이즈가 작아 돌 지나면 좁아진다는 후기(최근 배수구 마개가 추가된 신형도 있어 구매 전 확인 권장)", [["커뮤니티 후기", "https://mom-mom.net/itemsharings/62f0af4a969804f6d2a3531a"], ["유튜브 비교", "https://www.youtube.com/watch?v=ivAaZJ950wI"]]],
+      ["리안 드림콧 스탠드 욕조", "", "스탠드형이라 허리를 굽히지 않아도 되고 배수도 편함. 부피가 커서 공간을 많이 차지함('26년형' 리뉴얼 라인이 있어 최신 모델인지 확인 권장)"],
+      ["말랑하니 접이식 욕조", 38000, "폴딩 가능해 보관이 편하고 가격도 저렴함. 지지력은 슈너글보다 약하다는 후기", [["자사몰 리뷰", "https://malanghoney.com/board/review/read_photo.html?no=17733&board_no=4&spread_flag=T"]]]
     ]],
     ["위생·케어", "헹굼 욕조", 1, "선택", "", "말랑한 소재 제품이 편리하다는 후기"],
     ["위생·케어", "탕온계", 1, "선택", "", "목욕물 온도 체크용, 저렴한 제품도 충분"],
     ["위생·케어", "수전(욕조용)", 1, "선택", 49900, "추천: 두리. 아기 엉덩이 씻길 때 유용"],
     ["위생·케어", "아기 비데", 1, "선택", "", "세면대 사이즈에 맞는 제품으로 선택", [
-      ["밤비데", "", "무난하게 사용 가능한 스테디셀러. 세면대 사이즈에 따라 안 맞을 수 있음"],
-      ["포프베베", "", "세면대에 안 맞을 때 대안으로 많이 찾는 제품, 밤비데보다 더 좋아 보인다는 후기도"]
+      ["밤비데", "", "무난하게 사용 가능한 스테디셀러. 세면대 사이즈에 따라 안 맞을 수 있음(시그니처·엘레강스·3in1 등 라인이 여러 개라 구매 전 정확한 모델명 확인 권장)"],
+      ["포프베베", "", "세면대에 안 맞을 때 대안으로 많이 찾는 제품, 밤비데보다 더 좋아 보인다는 후기도", [["커뮤니티 리뷰", "https://mom-mom.net/itemsharings/63691b915a3714e132b812e4"], ["블로그 후기", "https://lamlamge.com/%ED%8F%AC%ED%94%84%EB%B2%A0%EB%B2%A0-%EC%95%84%EA%B8%B0-%EB%B9%84%EB%8D%B0-%EC%84%A4%EC%B9%98-%EB%82%B4%EB%8F%88%EB%82%B4%EC%82%B0-%ED%9B%84%EA%B8%B0/"]]]
     ]],
     ["위생·케어", "아기 수영 목튜브", 1, "선택", "", "생후 50일쯤부터 사용 가능. 욕조 물놀이용으로 좋아하는 편"],
     ["위생·케어", "목욕타올", 1, "필수", 35063, "추천: 밤부베베. 신생아 땐 천기저귀로 대체 가능, 이후 수건 사용"],
     ["위생·케어", "기저귀 갈이대", 1, "필수", 85960, "중간 수납칸 사용성은 아쉬운 편이라는 후기도 있음", [
-      ["예꼬맘 하이엔드 트롤리", 85960, "국민템급으로 검증됐고 수납 공간이 넉넉함. 조립이 다소 번거롭다는 후기"],
-      ["리안 드림콧 갈이대", "", "드림콧 침대와 연결해서 쓰면 동선이 편함. 리안 침대가 없으면 활용도가 낮음"],
-      ["소베맘 갈이대", "", "허리 높이에 맞춘 설계에 옆 수납공간이 있어 편리함. 아기가 서기 시작하면 더 이상 못 씀"]
+      ["예꼬맘 하이엔드 트롤리", 85960, "국민템급으로 검증됐고 수납 공간이 넉넉함. 조립이 다소 번거롭다는 후기", [["자사몰 리뷰", "https://babypia.co.kr/article/%EC%83%81%ED%92%88-%EC%82%AC%EC%9A%A9%ED%9B%84%EA%B8%B0/4/12684/"]]],
+      ["리안 드림콧 갈이대", "", "드림콧 침대와 연결해서 쓰면 동선이 편함. 리안 침대가 없으면 활용도가 낮음('26년형' 리뉴얼 라인이 있어 최신 모델인지 확인 권장)"],
+      ["소베맘 갈이대", "", "허리 높이에 맞춘 설계에 옆 수납공간이 있어 편리함. 아기가 서기 시작하면 더 이상 못 씀", [["리뷰", "https://alliviews.com/%EC%86%8C%EB%B2%A0%EB%A7%98-%EA%B8%B0%EC%A0%80%EA%B7%80-%EA%B0%88%EC%9D%B4%EB%8C%80/"], ["블로그", "https://test.baby-mansae.com/entry/%EA%B8%B0%EC%A0%80%EA%B7%80-%EA%B0%88%EC%9D%B4%EB%8C%80-%EC%86%8C%EB%B2%A0%EB%A7%98-%EC%9D%B4%EC%BC%80%EC%95%84%EC%84%B8%ED%83%81-%EB%B0%A9%EB%B2%95-%EB%AA%A8%EB%B9%8C"]]]
     ]],
     ["위생·케어", "방수매트", 1, "필수", 11700, "세탁 가능 제품은 중고 거래도 많음", [
       ["예꼬맘 코튼 방수패드", 11700, "갈이대와 세트로 쓰기 좋고 사이즈가 다양함. 세탁 후 건조가 오래 걸린다는 단점"],
@@ -826,21 +948,21 @@
     ["위생·케어", "무형광 세탁망", 1, "필수", 17000, "다이소에서도 구매 가능"],
     ["위생·케어", "아기 전용 세탁세제", 1, "필수", 12000, "예: 마더케이"],
     ["위생·케어", "손톱깎이 세트", 1, "필수", 15900, "신생아용 손톱가위+핀셋+네일파일+유아용 손톱깎이 세트 구성 추천", [
-      ["마더케이", 15900, "신생아용 손톱가위+유아용 가위+깎이 3종 세트, 보관캡과 고무손잡이가 있어 그립감이 좋음"],
-      ["더블하트", "", "오래된 스테디셀러 브랜드지만 마더케이 대비 인지도는 낮은 편"]
+      ["마더케이", 15900, "신생아용 손톱가위+유아용 가위+깎이 3종 세트, 보관캡과 고무손잡이가 있어 그립감이 좋음", [["블로그 추천", "https://themomstory.co.kr/%EC%86%90%ED%86%B1%EA%B9%8E%EC%9D%B4/"]]],
+      ["더블하트", "", "오래된 스테디셀러 브랜드지만 마더케이 대비 인지도는 낮은 편", [["커뮤니티 후기", "https://www.threads.com/@winner21c/post/DblXwdQlHdh/"]]]
     ]],
     ["위생·케어", "점착 면봉", 1, "선택", 6700, ""],
     ["위생·케어", "건티슈", 1, "선택", 13500, "물티슈로 발진이 생기는 아기에게 유용하지만 필요 없는 경우도 많음"],
     ["위생·케어", "안심 지퍼백", 1, "선택", 15900, "생각보다 사용량이 많지 않을 수 있음"],
     ["위생·케어", "샴푸앤바디워시", 1, "필수", 10000, "향에 따라 피부 트러블이 생길 수 있어 다른 브랜드로 바꿔볼 수 있음", [
       ["마더케이", 10000, "국내 육아용품 전문 브랜드의 두피·바디 겸용 올인원 제품. 거품이 다소 뻑뻑하다는 후기도(정확한 가격은 마더케이몰에서 재확인 권장)"],
-      ["무스텔라", "", "눈에 안 들어가는 노티어스 포뮬러로 유명함. 가격대는 중상급"],
-      ["아토팜 리얼베리어", 44800, "580ml 대용량이라 온가족이 같이 쓰기 좋고 세라마이드+아미노산 성분"]
+      ["무스텔라", "", "눈에 안 들어가는 노티어스 포뮬러로 유명함. 가격대는 중상급", [["브랜드 리얼리뷰", "https://mustelashop.co.kr/article/%EB%A6%AC%EC%96%BC%EB%A6%AC%EB%B7%B0/4/31758/"]]],
+      ["아토팜 리얼베리어", 44800, "580ml 대용량이라 온가족이 같이 쓰기 좋고 세라마이드+아미노산 성분", [["커뮤니티 리뷰", "https://mom-mom.net/itemsharings/638038c13d5611431e67fc23"]]]
     ]],
     ["위생·케어", "로션", 1, "필수", 44100, "", [
-      ["바이오더마", 44100, "저자극 처방으로 피부과에서도 자주 언급됨. 발림성이 다소 무겁다는 후기"],
-      ["무스텔라", 20500, "흡수가 빠르고 산뜻한 사용감. 향료가 들어있어 향에 민감한 아기는 패치테스트 권장"],
-      ["아토팜", "", "국내 브랜드로 세라마이드 성분, 아기화장품 브랜드평판 조사에서 꾸준히 상위권"]
+      ["바이오더마", 44100, "저자극 처방으로 피부과에서도 자주 언급됨. 발림성이 다소 무겁다는 후기", [["블로그 후기", "https://www.keyzard.cc/doublepapa/nb/223971791267"], ["커뮤니티 후기", "https://unpa.me/community/moisturizer/122332015"]]],
+      ["무스텔라", 20500, "흡수가 빠르고 산뜻한 사용감. 향료가 들어있어 향에 민감한 아기는 패치테스트 권장", [["블로그 후기", "http://bebetem.com/blogs/71418"], ["브랜드 리얼리뷰", "https://mustelashop.co.kr/article/%EB%A6%AC%EC%96%BC%EB%A6%AC%EB%B7%B0/4/44467"]]],
+      ["아토팜", "", "국내 브랜드로 세라마이드 성분, 아기화장품 브랜드평판 조사에서 꾸준히 상위권", [["블로그 후기", "https://luv.ikkujun.com/entry/%EC%95%84%ED%86%A0%ED%8C%9C-mle-%ED%81%AC%EB%A6%BC-%EB%91%90-%EB%8B%AC-%EC%82%AC%EC%9A%A9-%EC%B0%90-%ED%9B%84%EA%B8%B0"]]]
     ]],
     ["위생·케어", "수딩젤", 1, "선택", "", "태열 심할 때 몽디에스 등 구매. 여름 아기는 미리 구비해두면 좋음"],
     ["위생·케어", "란시노 크림", 1, "선택", 11000, "침독·태열·땀띠 보습용, 입에 들어가도 안전. 모유수유 시 유두 보호용으로도 사용. 침독엔 아쿠아퍼가 더 낫다는 평도"],
@@ -865,8 +987,8 @@
       ["베이비아인슈타인", "", "클래식 음악이 나오는 모빌로 유명함. 구매 부담이 있다면 대여로 먼저 써보는 부모도 많음"]
     ]],
     ["장난감·발달", "아기 체육관(플레이짐)", 1, "선택", 70200, "모빌 졸업 후 이어서 쓰는 필수템", [
-      ["피셔프라이스", 70200, "멜로디·조명이 다양해 아기 시선을 끌기 좋음. 부피가 커서 보관 공간이 필요함"],
-      ["베이비아인슈타인", 79000, "피아노 건반과 클래식 음악이 조합된 제품으로 인기. 가격은 피셔프라이스보다 다소 높음"]
+      ["피셔프라이스", 70200, "멜로디·조명이 다양해 아기 시선을 끌기 좋음. 부피가 커서 보관 공간이 필요함", [["블로그 후기", "https://omblily.com/entry/%ED%94%BC%EC%85%94%ED%94%84%EB%9D%BC%EC%9D%B4%EC%8A%A4-%EC%95%84%EA%B8%B0%EC%B2%B4%EC%9C%A1%EA%B4%80-%EA%B5%AD%EB%AF%BC-%EC%95%84%EA%B8%B0-%EC%9E%A5%EB%82%9C%EA%B0%90%EC%9D%B8-%EC%9D%B4%EC%9C%A0"], ["유튜브 리뷰", "https://www.youtube.com/watch?v=J96xMCug158"]]],
+      ["베이비아인슈타인", 79000, "피아노 건반과 클래식 음악이 조합된 제품으로 인기. 가격은 피셔프라이스보다 다소 높음(일부 단종 언급도 있어 구매 전 재고 확인 권장)"]
     ]],
     ["장난감·발달", "딸랑이(튤립)", 1, "선택", "", "국민템으로 꼽히는 장난감"],
     ["장난감·발달", "터미타임 장난감(꼬꼬맘)", 1, "선택", "", ""],
@@ -1128,20 +1250,7 @@
 
           brandSelect.addEventListener("change", function () {
             if (brandSelect.value === "__custom__") {
-              var newName = window.prompt("추가할 브랜드/제품명을 입력하세요");
-              if (!newName || !newName.trim()) { renderAll(); return; }
-              var costRaw = window.prompt("예상 비용(원, 모르면 비워두세요)");
-              var newCost = null;
-              if (costRaw && costRaw.trim() !== "") {
-                var parsed = parseInt(costRaw.replace(/[^0-9]/g, ""), 10);
-                newCost = isNaN(parsed) ? null : parsed;
-              }
-              var insertAt = item.brands.length - 1;
-              item.brands.splice(insertAt, 0, { name: newName.trim(), cost: newCost, note: "", links: [] });
-              item.brandIndex = insertAt;
-              item.cost = newCost;
-              save();
-              renderAll();
+              openBrandModal(item);
               return;
             }
             item.brandIndex = parseInt(brandSelect.value, 10);
@@ -1262,6 +1371,57 @@
     document.getElementById("f-qty").value = 1;
     activeFilter = category;
     renderAll();
+  });
+
+  var modalOverlay = document.getElementById("brand-modal-overlay");
+  var modalForm = document.getElementById("brand-modal-form");
+  var modalNameInput = document.getElementById("brand-modal-name");
+  var modalCostInput = document.getElementById("brand-modal-cost");
+  var modalItemNameEl = document.getElementById("brand-modal-item-name");
+  var modalCancelBtn = document.getElementById("brand-modal-cancel");
+  var pendingModalItem = null;
+
+  function openBrandModal(item) {
+    pendingModalItem = item;
+    modalItemNameEl.textContent = item.name;
+    modalNameInput.value = "";
+    modalCostInput.value = "";
+    modalOverlay.classList.remove("hidden");
+    modalNameInput.focus();
+  }
+
+  function closeBrandModal() {
+    modalOverlay.classList.add("hidden");
+    pendingModalItem = null;
+    renderAll();
+  }
+
+  modalForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!pendingModalItem) { closeBrandModal(); return; }
+    var newName = modalNameInput.value.trim();
+    if (!newName) { closeBrandModal(); return; }
+    var costRaw = modalCostInput.value;
+    var newCost = costRaw === "" ? null : parseInt(costRaw, 10);
+    if (isNaN(newCost)) newCost = null;
+
+    var item = pendingModalItem;
+    var insertAt = item.brands.length - 1;
+    item.brands.splice(insertAt, 0, { name: newName, cost: newCost, note: "", links: [] });
+    item.brandIndex = insertAt;
+    item.cost = newCost;
+    save();
+    modalOverlay.classList.add("hidden");
+    pendingModalItem = null;
+    renderAll();
+  });
+
+  modalCancelBtn.addEventListener("click", closeBrandModal);
+  modalOverlay.addEventListener("click", function (e) {
+    if (e.target === modalOverlay) closeBrandModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modalOverlay.classList.contains("hidden")) closeBrandModal();
   });
 
   renderAll();
