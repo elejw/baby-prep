@@ -1,0 +1,759 @@
+<title>출산 준비 타임라인</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #f3f4ef;
+    --surface: #ffffff;
+    --surface-alt: #eaede4;
+    --ink: #22261f;
+    --ink-soft: #5c6152;
+    --ink-faint: #8b9080;
+    --line: #dcdfd3;
+    --accent: #2f6e62;
+    --accent-strong: #204e45;
+    --accent-soft: #dceae5;
+    --highlight: #c97a2e;
+    --highlight-soft: #f3e2c9;
+    --shadow: 0 1px 2px rgba(34,38,31,0.06), 0 8px 24px -12px rgba(34,38,31,0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121615;
+      --surface: #1a201e;
+      --surface-alt: #212824;
+      --ink: #edeee6;
+      --ink-soft: #aab0a0;
+      --ink-faint: #737a6c;
+      --line: #2b3330;
+      --accent: #74bda8;
+      --accent-strong: #a3d6c5;
+      --accent-soft: #1e2f2b;
+      --highlight: #e8a565;
+      --highlight-soft: #382a1a;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #121615;
+    --surface: #1a201e;
+    --surface-alt: #212824;
+    --ink: #edeee6;
+    --ink-soft: #aab0a0;
+    --ink-faint: #737a6c;
+    --line: #2b3330;
+    --accent: #74bda8;
+    --accent-strong: #a3d6c5;
+    --accent-soft: #1e2f2b;
+    --highlight: #e8a565;
+    --highlight-soft: #382a1a;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Work Sans", "Segoe UI", sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 56px 24px 100px;
+  }
+
+  h1, h2, h3 {
+    font-family: "Fraunces", Georgia, serif;
+    text-wrap: balance;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* ---------- header ---------- */
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  header.hero {
+    margin-bottom: 40px;
+  }
+
+  header.hero h1 {
+    font-size: clamp(30px, 5vw, 42px);
+    font-weight: 600;
+    margin-top: 10px;
+    letter-spacing: -0.01em;
+  }
+
+  header.hero p.sub {
+    margin-top: 12px;
+    max-width: 60ch;
+    color: var(--ink-soft);
+    font-size: 16px;
+  }
+
+  .stat-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 16px;
+    min-width: 128px;
+    box-shadow: var(--shadow);
+  }
+
+  .stat .num {
+    font-family: "IBM Plex Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--accent-strong);
+  }
+
+  .stat .label {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  /* ---------- section shell ---------- */
+
+  section {
+    margin-top: 56px;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 14px;
+  }
+
+  .section-head h2 {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .section-head .count {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- timeline ---------- */
+
+  .timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .phase {
+    display: grid;
+    grid-template-columns: 108px 1fr;
+    gap: 20px;
+    position: relative;
+  }
+
+  .phase-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .phase-week {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    border-radius: 999px;
+    padding: 5px 10px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .phase-line {
+    flex: 1;
+    width: 1.5px;
+    background: var(--line);
+    margin-top: 8px;
+    min-height: 20px;
+  }
+
+  .phase:last-of-type .phase-line { display: none; }
+
+  .phase-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 24px 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .phase-card h3 {
+    font-size: 19px;
+    font-weight: 600;
+  }
+
+  .phase-card .phase-tag {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  .checklist {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 15px;
+  }
+
+  .checklist input[type="checkbox"] {
+    appearance: none;
+    width: 17px;
+    height: 17px;
+    border: 1.5px solid var(--ink-faint);
+    border-radius: 5px;
+    margin-top: 3px;
+    flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+    background: var(--surface);
+  }
+
+  .checklist input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .checklist input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(40deg);
+  }
+
+  .checklist input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .checklist label {
+    cursor: pointer;
+  }
+
+  .checklist .note {
+    display: block;
+    color: var(--ink-soft);
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  .item-checked label { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--line); }
+  .item-checked .note { text-decoration: none; }
+
+  /* ---------- category grid ---------- */
+
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .cat-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+
+  .cat-card h3 {
+    font-size: 16.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cat-card .swatch {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .cat-card ul {
+    margin: 14px 0 0;
+    padding-left: 0;
+    list-style: none;
+    columns: 1;
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .cat-card ul li::before {
+    content: "·";
+    color: var(--accent);
+    margin-right: 7px;
+    font-weight: 700;
+  }
+
+  /* ---------- benefits table ---------- */
+
+  .benefits {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 4px;
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 640px;
+    font-size: 14.5px;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  thead th {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  td.amount {
+    font-family: "IBM Plex Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-strong);
+    white-space: nowrap;
+  }
+
+  td .where { display: block; color: var(--ink-soft); font-size: 13px; margin-top: 3px; }
+
+  /* ---------- urgent callout ---------- */
+
+  .callout {
+    background: var(--highlight-soft);
+    border: 1px solid color-mix(in srgb, var(--highlight) 35%, transparent);
+    border-radius: 14px;
+    padding: 22px 24px;
+  }
+
+  .callout h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .callout ol {
+    margin: 12px 0 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 15px;
+  }
+
+  .callout ol li::marker {
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--highlight);
+    font-weight: 500;
+  }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 620px) {
+    .phase { grid-template-columns: 1fr; }
+    .phase-rail { flex-direction: row; }
+    .phase-line { width: auto; height: 1.5px; flex: 1; margin: 0 8px; }
+    .cat-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="hero">
+    <div class="eyebrow">첫 아이 · 한국 거주 기준</div>
+    <h1>출산 준비 타임라인</h1>
+    <p class="sub">예정일까지 약 4개월(16주) 남은 지금부터 퇴원 직후까지, 부부가 함께 챙길 일을 시기별로 정리했습니다. 체크박스는 이 페이지에만(이 브라우저에만) 저장되니 진행 상황을 표시하며 써보세요.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="num">D-16주</div><div class="label">오늘 기준 대략치</div></div>
+      <div class="stat"><div class="num">5</div><div class="label">준비 단계</div></div>
+      <div class="stat"><div class="num">4</div><div class="label">용품 카테고리</div></div>
+    </div>
+  </header>
+
+  <section id="timeline">
+    <div class="section-head">
+      <h2>시기별 타임라인</h2>
+      <span class="count">지금 → 출산 → 퇴원</span>
+    </div>
+
+    <div class="timeline">
+
+      <div class="phase">
+        <div class="phase-rail">
+          <div class="phase-week">D-16주~</div>
+          <div class="phase-line"></div>
+        </div>
+        <div class="phase-card">
+          <h3>1단계 · 큰 그림 잡기</h3>
+          <div class="phase-tag">지금부터 약 4주간 · 안정기 후반</div>
+          <ul class="checklist" data-group="p1"></ul>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-rail">
+          <div class="phase-week">D-12주</div>
+          <div class="phase-line"></div>
+        </div>
+        <div class="phase-card">
+          <h3>2단계 · 예약과 서류 준비</h3>
+          <div class="phase-tag">약 3개월 전</div>
+          <ul class="checklist" data-group="p2"></ul>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-rail">
+          <div class="phase-week">D-8주</div>
+          <div class="phase-line"></div>
+        </div>
+        <div class="phase-card">
+          <h3>3단계 · 용품 구매 본격화</h3>
+          <div class="phase-tag">약 2개월 전</div>
+          <ul class="checklist" data-group="p3"></ul>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-rail">
+          <div class="phase-week">D-4주</div>
+          <div class="phase-line"></div>
+        </div>
+        <div class="phase-card">
+          <h3>4단계 · 막달, 병원 갈 준비</h3>
+          <div class="phase-tag">출산 한 달 전</div>
+          <ul class="checklist" data-group="p4"></ul>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-rail">
+          <div class="phase-week">D-Day 이후</div>
+        </div>
+        <div class="phase-card">
+          <h3>5단계 · 출산 직후 · 조리원 · 퇴원</h3>
+          <div class="phase-tag">병원 입원부터 조리원 퇴소까지</div>
+          <ul class="checklist" data-group="p5"></ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="urgent">
+    <div class="callout">
+      <h3>진통 시작되면 이 순서로</h3>
+      <ol>
+        <li>규칙적인 진통(5~10분 간격, 1분 이상 지속) 또는 양수 파수, 출혈이 있으면 다니는 산부인과에 바로 전화</li>
+        <li>병원가방·산모수첩·신분증·건강보험증·차량/카시트 확인 후 출발</li>
+        <li>남편은 배우자 출산휴가(유급 10일) 사용 시점을 병원 도착과 동시에 회사에 통보</li>
+        <li>도착 후 접수 시 임신·출산 진료비 지원(국민행복카드) 제시</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="categories">
+    <div class="section-head">
+      <h2>카테고리별 준비물</h2>
+      <span class="count">막달 전까지 채워두면 좋은 것들</span>
+    </div>
+    <div class="cat-grid">
+
+      <div class="cat-card">
+        <h3><span class="swatch"></span>병원 가방</h3>
+        <ul>
+          <li>산모수첩, 신분증, 건강보험증, 국민행복카드</li>
+          <li>편한 상하의, 수유 가능한 잠옷, 카디건</li>
+          <li>산모 패드, 수유브라, 개인 세면도구</li>
+          <li>배냇저고리, 속싸개, 기저귀 여유분(병원 비치 확인)</li>
+          <li>카시트(퇴원 시 필수), 아기 외출복 한 벌</li>
+          <li>휴대폰 충전기, 보호자 여벌 옷·세면도구</li>
+        </ul>
+      </div>
+
+      <div class="cat-card">
+        <h3><span class="swatch"></span>신생아 용품</h3>
+        <ul>
+          <li>카시트, 유모차 (신생아 등받이 각도 확인)</li>
+          <li>아기 침대 또는 범퍼침대, 속싸개</li>
+          <li>기저귀(신생아용), 물티슈, 기저귀 크림</li>
+          <li>젖병·젖꼭지, 분유(모유 상황과 무관히 비상용), 소독기</li>
+          <li>배냇저고리·바디수트 5~6벌, 손싸개·양말</li>
+          <li>아기 욕조, 체온계, 유아용 손톱가위</li>
+        </ul>
+      </div>
+
+      <div class="cat-card">
+        <h3><span class="swatch"></span>산모 회복 용품</h3>
+        <ul>
+          <li>산모패드(대형→중형 단계별), 산모용 속옷</li>
+          <li>좌욕기, 회음부 방석(도넛 쿠션)</li>
+          <li>수유브라·수유패드, 유두보호크림</li>
+          <li>복대(제왕절개 시 별도 제품), 압박스타킹</li>
+          <li>산후 조리용 실내복, 양말(보온)</li>
+        </ul>
+      </div>
+
+      <div class="cat-card">
+        <h3><span class="swatch"></span>집안 준비</h3>
+        <ul>
+          <li>아기 공간(침대·기저귀교환대) 동선 배치</li>
+          <li>온습도계, 가습기, 실내 온도 22~24도 유지 계획</li>
+          <li>콘센트 커버 등 기초 안전장치</li>
+          <li>세탁 분리(아기 전용 세제·건조대)</li>
+          <li>산모 도우미/친정·시댁 방문 일정 조율</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="benefits">
+    <div class="section-head">
+      <h2>정부·지자체 지원금 &amp; 서류</h2>
+      <span class="count">한국 기준 · 거주 지자체별로 금액·조건 상이하니 정부24·주민센터에서 재확인</span>
+    </div>
+    <div class="benefits">
+      <table>
+        <thead>
+          <tr><th>항목</th><th>내용</th><th>금액</th><th>신청 시점</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>국민행복카드<span class="where">(임신·출산 진료비 지원)</span></td>
+            <td>임신 확인 후 병원·은행 앱에서 발급, 진료비·검사비 결제에 사용</td>
+            <td class="amount">약 100만원</td>
+            <td>임신 확인 직후</td>
+          </tr>
+          <tr>
+            <td>첫만남이용권</td>
+            <td>출생신고 후 국민행복카드로 지급되는 바우처</td>
+            <td class="amount">200만원</td>
+            <td>출생신고 후</td>
+          </tr>
+          <tr>
+            <td>부모급여</td>
+            <td>만 0세, 만 1세 아동 양육 가정에 매월 지급</td>
+            <td class="amount">0세 월100만원 / 1세 월50만원</td>
+            <td>출생 후 60일 이내</td>
+          </tr>
+          <tr>
+            <td>아동수당</td>
+            <td>만 8세 미만 아동에게 매월 지급</td>
+            <td class="amount">월 10만원</td>
+            <td>출생 후 60일 이내</td>
+          </tr>
+          <tr>
+            <td>지자체 출산지원금<span class="where">거주 시·군·구별 별도 지급, 금액 편차 큼</span></td>
+            <td>거주지 주민센터·정부24에서 별도 확인 필요</td>
+            <td class="amount">지역마다 다름</td>
+            <td>출생신고 시 함께</td>
+          </tr>
+          <tr>
+            <td>출생신고</td>
+            <td>주민센터 또는 정부24, 병원 출생증명서 필요</td>
+            <td class="amount">-</td>
+            <td>출생 후 1개월 이내</td>
+          </tr>
+          <tr>
+            <td>배우자 출산휴가</td>
+            <td>남편 유급휴가, 출산일로부터 90일 내 신청</td>
+            <td class="amount">10일(유급)</td>
+            <td>출산 전 회사에 미리 통보 권장</td>
+          </tr>
+          <tr>
+            <td>출산전후휴가 / 육아휴직</td>
+            <td>산모 90일 출산전후휴가, 이후 육아휴직 신청 가능</td>
+            <td class="amount">출산휴가급여·육아휴직급여</td>
+            <td>출산 전 회사 인사팀과 일정 조율</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    체크 표시는 이 브라우저의 로컬 저장소에만 남고 다른 기기·다른 세션과 공유되지 않습니다. 지원금 금액과 조건은 2026년 기준 정책이며 변경될 수 있으니 신청 전 정부24·주민센터·복지로에서 최신 내용을 확인하세요.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var data = {
+    p1: [
+      ["p1-1", "산후조리원 후보 3~4곳 방문·예약", "인기 조리원은 20주 전에도 마감되는 경우가 많아 서두르는 게 좋습니다."],
+      ["p1-2", "분만 병원 최종 확정 및 정기검진 스케줄 확인", ""],
+      ["p1-3", "임신·출산 진료비 지원(국민행복카드) 발급", "아직 안 했다면 지금 신청해도 늦지 않습니다."],
+      ["p1-4", "카시트·유모차 모델 리서치 및 예산 정하기", "실물은 매장에서 직접 접이·설치해보고 결정 추천"],
+      ["p1-5", "태명·태교 방식, 태담·태교여행 여부 상의", ""],
+      ["p1-6", "회사에 임신 사실 공유 및 출산휴가·육아휴직 시점 초안 논의", "남편도 배우자 출산휴가 10일 사용 시점 미리 상의"]
+    ],
+    p2: [
+      ["p2-1", "출산전후휴가·육아휴직 신청서 준비(인사팀 협의)", ""],
+      ["p2-2", "아기 이름 후보 정하기(출생신고 대비)", ""],
+      ["p2-3", "산모수첩·진료 기록 정리, 이상 소견 있으면 상급병원 연계 확인", ""],
+      ["p2-4", "조리원 계약금 입금, 필요 서류·준비물 리스트 받기", ""],
+      ["p2-5", "거주 지자체 출산지원금·바우처 종류 조사(정부24, 주민센터)", "지역마다 금액·조건이 크게 달라 미리 알아두면 신청을 놓치지 않습니다."],
+      ["p2-6", "육아 도우미 또는 친정·시댁 도움 일정 대략 조율", ""]
+    ],
+    p3: [
+      ["p3-1", "카시트·유모차·아기침대 구매", "신생아 아기침대는 조립 시간이 걸리니 여유 있게"],
+      ["p3-2", "젖병·분유·소독기 등 수유 용품 구매", ""],
+      ["p3-3", "배냇저고리·기저귀 등 신생아 용품 구매 및 세탁 준비", "아기 옷은 전용 세제로 미리 한 번 세탁"],
+      ["p3-4", "산모 회복 용품(산모패드, 좌욕기, 수유브라 등) 구매", ""],
+      ["p3-5", "임신 후기 검사(당뇨 재확인, GBS 등) 일정 확인", ""],
+      ["p3-6", "남편 육아휴직 여부 및 시작 시점 회사에 정식 통보", ""]
+    ],
+    p4: [
+      ["p4-1", "병원가방(산모용·아기용·보호자용) 미리 싸두기", "막달 진입 시점에 미리 싸두면 급할 때 당황하지 않습니다."],
+      ["p4-2", "조리원 짐 싸기 및 입소 절차 재확인", ""],
+      ["p4-3", "진통 징후(이슬, 규칙적 진통, 양수 파수) 남편과 함께 숙지", ""],
+      ["p4-4", "병원 응급실 야간 연락처, 최단 이동 경로 확인", "차량이 없다면 야간 택시 호출 앱 미리 설치"],
+      ["p4-5", "출생신고 서류 목록 확인(등본, 출생증명서 등)", ""],
+      ["p4-6", "출산 직후 연락할 사람 리스트, 병원 면회 규정 확인", ""]
+    ],
+    p5: [
+      ["p5-1", "출생증명서 수령, 1개월 이내 출생신고", ""],
+      ["p5-2", "첫만남이용권 신청(국민행복카드로 지급)", ""],
+      ["p5-3", "부모급여·아동수당 신청(출생 후 60일 이내)", "60일 넘기면 그 달 지원금이 소급되지 않을 수 있어 유의"],
+      ["p5-4", "건강보험 피부양자 등록", ""],
+      ["p5-5", "조리원 입소 및 신생아 검진(선천성 대사이상 검사 등) 일정 확인", ""],
+      ["p5-6", "지자체 출산지원금 신청", ""]
+    ]
+  };
+
+  var STORAGE_KEY = "birth-prep-checklist-v1";
+  var state = {};
+  try {
+    state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  } catch (e) {
+    state = {};
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {}
+  }
+
+  Object.keys(data).forEach(function (group) {
+    var ul = document.querySelector('.checklist[data-group="' + group + '"]');
+    if (!ul) return;
+    data[group].forEach(function (item) {
+      var id = item[0], text = item[1], note = item[2];
+      var li = document.createElement("li");
+      if (state[id]) li.className = "item-checked";
+
+      var checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = id;
+      checkbox.checked = !!state[id];
+
+      var labelWrap = document.createElement("div");
+      var label = document.createElement("label");
+      label.setAttribute("for", id);
+      label.textContent = text;
+      labelWrap.appendChild(label);
+
+      if (note) {
+        var noteEl = document.createElement("span");
+        noteEl.className = "note";
+        noteEl.textContent = note;
+        labelWrap.appendChild(noteEl);
+      }
+
+      checkbox.addEventListener("change", function () {
+        state[id] = checkbox.checked;
+        li.className = checkbox.checked ? "item-checked" : "";
+        save();
+      });
+
+      li.appendChild(checkbox);
+      li.appendChild(labelWrap);
+      ul.appendChild(li);
+    });
+  });
+})();
+</script>
