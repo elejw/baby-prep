@@ -445,6 +445,19 @@
     max-width: 46ch;
   }
 
+  .brand-links {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+  }
+
+  .brand-links a {
+    color: var(--accent-strong);
+    text-decoration: none;
+  }
+
+  .brand-links a:hover { text-decoration: underline; }
+
   .item-qty {
     font-family: "IBM Plex Mono", monospace;
     font-variant-numeric: tabular-nums;
@@ -630,7 +643,7 @@
 
 <script>
 (function () {
-  var STORAGE_KEY = "birth-prep-items-v8";
+  var STORAGE_KEY = "birth-prep-items-v9";
   var CATEGORIES = ["장비", "아기 의류", "침구", "수유용품", "위생·케어", "장난감·발달", "병원가방·의류", "병원가방·수유", "병원가방·위생·의약품", "병원가방·기타", "산모 회복 용품", "집안 준비", "기타"];
 
   var defaults = [
@@ -937,11 +950,11 @@
   ].map(function (row, i) {
     var brands = row[6]
       ? row[6].map(function (b) {
-          return { name: b[0], cost: b[1] === "" ? null : Number(b[1]), note: b[2] };
-        }).concat([{ name: "미정", cost: 0, note: "" }])
+          return { name: b[0], cost: b[1] === "" ? null : Number(b[1]), note: b[2], links: (b[3] || []).map(function (l) { return { label: l[0], url: l[1] }; }) };
+        }).concat([{ name: "미정", cost: 0, note: "", links: [] }])
       : [
-          { name: "확정", cost: row[4] === "" ? null : Number(row[4]), note: "" },
-          { name: "미정", cost: 0, note: "" }
+          { name: "확정", cost: row[4] === "" ? null : Number(row[4]), note: "", links: [] },
+          { name: "미정", cost: 0, note: "", links: [] }
         ];
     return {
       id: "seed-" + i,
@@ -1108,7 +1121,29 @@
             if (bi === item.brandIndex) opt.selected = true;
             brandSelect.appendChild(opt);
           });
+          var customOpt = document.createElement("option");
+          customOpt.value = "__custom__";
+          customOpt.textContent = "+ 직접 추가";
+          brandSelect.appendChild(customOpt);
+
           brandSelect.addEventListener("change", function () {
+            if (brandSelect.value === "__custom__") {
+              var newName = window.prompt("추가할 브랜드/제품명을 입력하세요");
+              if (!newName || !newName.trim()) { renderAll(); return; }
+              var costRaw = window.prompt("예상 비용(원, 모르면 비워두세요)");
+              var newCost = null;
+              if (costRaw && costRaw.trim() !== "") {
+                var parsed = parseInt(costRaw.replace(/[^0-9]/g, ""), 10);
+                newCost = isNaN(parsed) ? null : parsed;
+              }
+              var insertAt = item.brands.length - 1;
+              item.brands.splice(insertAt, 0, { name: newName.trim(), cost: newCost, note: "", links: [] });
+              item.brandIndex = insertAt;
+              item.cost = newCost;
+              save();
+              renderAll();
+              return;
+            }
             item.brandIndex = parseInt(brandSelect.value, 10);
             item.cost = item.brands[item.brandIndex].cost;
             save();
@@ -1116,12 +1151,27 @@
           });
           brandCell.appendChild(brandSelect);
 
-          var brandNote = item.brands[item.brandIndex].note;
+          var currentBrand = item.brands[item.brandIndex];
+          var brandNote = currentBrand.note;
           if (brandNote) {
             var brandNoteEl = document.createElement("span");
             brandNoteEl.className = "brand-note";
             brandNoteEl.textContent = "💡 " + brandNote;
             nameWrap.appendChild(brandNoteEl);
+          }
+          if (currentBrand.links && currentBrand.links.length) {
+            var linksEl = document.createElement("span");
+            linksEl.className = "brand-links";
+            currentBrand.links.forEach(function (l, li) {
+              var a = document.createElement("a");
+              a.href = l.url;
+              a.target = "_blank";
+              a.rel = "noopener noreferrer";
+              a.textContent = l.label;
+              linksEl.appendChild(a);
+              if (li < currentBrand.links.length - 1) linksEl.appendChild(document.createTextNode(" · "));
+            });
+            nameWrap.appendChild(linksEl);
           }
         } else {
           brandCell.innerHTML = '<span class="no-brand">—</span>';
