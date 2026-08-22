@@ -395,6 +395,35 @@
   .item-name { font-weight: 500; }
   .item-note { display: block; color: var(--ink-soft); font-size: 12.5px; margin-top: 2px; font-weight: 400; }
 
+  .brand-select {
+    display: block;
+    margin-top: 6px;
+    font-family: "Work Sans", sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+
+  .brand-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .brand-note {
+    display: block;
+    margin-top: 5px;
+    padding: 7px 10px;
+    background: var(--highlight-soft);
+    border-radius: 8px;
+    color: var(--ink);
+    font-size: 12.5px;
+    font-weight: 400;
+    line-height: 1.5;
+    max-width: 46ch;
+  }
+
   .item-qty {
     font-family: "IBM Plex Mono", monospace;
     font-variant-numeric: tabular-nums;
@@ -574,7 +603,7 @@
 
 <script>
 (function () {
-  var STORAGE_KEY = "birth-prep-items-v2";
+  var STORAGE_KEY = "birth-prep-items-v3";
   var CATEGORIES = ["장비", "아기 의류", "침구", "수유용품", "위생·케어", "장난감·발달", "병원가방·의류", "병원가방·수유", "병원가방·위생·의약품", "병원가방·기타", "산모 회복 용품", "집안 준비", "기타"];
 
   var defaults = [
@@ -605,8 +634,10 @@
     ["아기 의류", "양말(신생아)", 1, "선택", "", "신생아 땐 거의 안 신기므로 몇 개만 있어도 충분. 외출 시작하면 더 필요"],
     ["아기 의류", "모로반사 방지템", 1, "선택", "", "예: 머미쿨쿨 좁쌀이불. 잘 쓰다가 뒤집기 시작하면 졸업이 힘들 수 있음"],
     ["아기 의류", "스와들업", 1, "필수", 50000, "오리지널·밤부 소재 각 1개 추천. 손 빠는 아기가 많아 새 제품 구매 권장. 거부하는 아기도 있어 먼저 하나만 사서 테스트"],
-    ["아기 의류", "손수건(거즈·엠보)", 1, "필수", 18181, "추천: 밤부베베. 거즈 10장+엠보 5장 정도. 실사용상 거즈 손수건을 훨씬 많이 쓰게 됨"],
-    ["아기 의류", "손수건(면세점 구매)", 1, "선택", 40119, "예: 베베룬"],
+    ["아기 의류", "손수건", 1, "필수", 18181, "", [
+      ["밤부베베", 18181, "거즈 10장+엠보 5장 구성. 실사용상 거즈 손수건을 훨씬 많이 쓰게 됨"],
+      ["베베룬", 40119, "면세점에서 저렴하게 구매 가능. 거즈 10장+엠보 15장 구성"]
+    ]],
     ["아기 의류", "사각기저귀(천기저귀)", 1, "필수", 15587, "추천: 밤부베베. 속싸개·목욕수건·역류방지쿠션 깔개 등 다용도로 활용 가능"],
     ["침구", "아기 침대", 1, "필수", 182380, "추천: 리안 드림콧. 뒤집기 전까지 사용, 이후 큰 침대로 교체"],
     ["침구", "침대 패드", 1, "필수", 65600, "추천: 마이리틀데이지"],
@@ -617,18 +648,30 @@
     ["침구", "역류 방지 쿠션", 1, "선택", "", "하이체어 뉴본시트를 잘 쓰면 덜 필요할 수 있음"],
     ["침구", "아기 담요", 1, "선택", "", "실용성보다는 포토·만족용에 가까움"],
     ["침구", "베개(신생아용)", 1, "선택", "", "❌ 신생아는 베개가 불필요하다는 의견이 많음. 천기저귀 접어서 쓰다가 태열 있으면 그때 전용 베개 고려"],
-    ["침구", "두상 베개", 1, "선택", "", "호불호 있음(태열 있으면 몽슈레·엘라바, 없으면 라비킷). 뒤집기 시작하면 무용지물이라는 의견도"],
+    ["침구", "두상 베개", 1, "선택", "", "호불호 있는 아이템. 뒤집기 시작하면 무용지물이라는 의견도", [
+      ["라비킷", "", "태열 없을 때 선택지. 호불호 갈림"],
+      ["엘라바", "", "태열 있을 때 추천되는 브랜드"],
+      ["몽슈레", "", "태열 있을 때 추천되는 브랜드"]
+    ]],
     ["침구", "원형 러그", 1, "선택", "", "❌ 사진 촬영용 정도로만 활용됨"],
     ["침구", "디데이 캘린더", 1, "선택", 9380, "포토 소품. 만삭사진 찍을 때도 활용 가능"],
-    ["수유용품", "젖병(헤겐)", 1, "선택", 49000, "예쁘지만 가격대가 있는 편"],
-    ["수유용품", "젖병(더블하트·닥터브라운)", 1, "필수", 41800, "닥터브라운은 배앓이 방지로 유명, 더블하트는 국민템으로 타사 젖꼭지 호환이 잘 됨"],
-    ["수유용품", "쪽쪽이(피죤·더블하트)", 1, "선택", "", "월령별(0-3개월/3-6개월)로 구비. 아기마다 선호하는 모양이 다름"],
-    ["수유용품", "쪽쪽이(필립스 아벤트)", 1, "선택", 12900, "아기들이 잘 무는 것으로 유명한 모델"],
+    ["수유용품", "젖병", 1, "필수", 41800, "", [
+      ["더블하트", 25000, "국민템 젖병 브랜드. 타사 젖꼭지 호환이 잘 됨"],
+      ["닥터브라운", 17000, "배앓이 방지 젖병으로 유명"],
+      ["헤겐", 49000, "예쁘지만 가격대가 있는 편"]
+    ]],
+    ["수유용품", "쪽쪽이", 1, "선택", "", "월령별(0-3개월/3-6개월)로 구비. 아기마다 선호하는 모양이 다름", [
+      ["피죤(더블하트)", "", "일본에서 흔히 구매하는 브랜드"],
+      ["필립스 아벤트", 12900, "아기들이 잘 물기로 유명한 모델"]
+    ]],
     ["수유용품", "쪽쪽이 스트랩", 1, "선택", 4900, "예: 퍼기 실리콘 멀티스트랩"],
     ["수유용품", "쪽쪽이 케이스", 1, "선택", 10000, "구매 시 케이스가 함께 오는 경우도 많음"],
     ["수유용품", "분유", 1, "필수", "", "조리원 퇴소 전 구매. 맘카페 추천: 카브리타·산양·압타밀(푸로푸트라/A2) 등. 배앓이 있으면 소화 잘되는 Hipp 계열 고려"],
     ["수유용품", "분유 제조기", 1, "선택", 130000, "추천: 베이비 브레짜. 모유 수유가 어려울 경우 매우 유용. 분유수유 계획 있으면 중고라도 구매 추천. 깔때기 부품은 소모품이라 여분 구매 필요"],
-    ["수유용품", "분유포트", 1, "선택", "", "브레짜 쓸 경우 커피포트형 보르르, 손으로 탈 경우 정수기형 라비킷 추천"],
+    ["수유용품", "분유포트", 1, "선택", "", "", [
+      ["보르르", "", "커피포트형. 분유 제조기(베이비 브레짜)와 함께 쓸 경우 추천"],
+      ["라비킷", "", "정수기형. 손으로 분유 탈 경우 추천"]
+    ]],
     ["수유용품", "수유 쿠션", 1, "선택", "", "모유수유를 집에서 할 계획이면 꼭 필요"],
     ["수유용품", "수유 시트", 1, "필수", "", "예: 알프레미오. 분유수유 시 필수. 중고로 저렴하게 구할 수 있음"],
     ["수유용품", "수유 의자", 1, "선택", 45000, "있으면 편하지만 필수는 아니라는 의견도 있음"],
@@ -645,7 +688,10 @@
     ["위생·케어", "헹굼 욕조", 1, "선택", "", "말랑한 소재 제품이 편리하다는 후기"],
     ["위생·케어", "탕온계", 1, "선택", "", "목욕물 온도 체크용, 저렴한 제품도 충분"],
     ["위생·케어", "수전(욕조용)", 1, "선택", 49900, "추천: 두리. 아기 엉덩이 씻길 때 유용"],
-    ["위생·케어", "아기 비데", 1, "선택", "", "예: 밤비데·포프베베. 세면대 사이즈에 맞는 제품으로 선택"],
+    ["위생·케어", "아기 비데", 1, "선택", "", "세면대 사이즈에 맞는 제품으로 선택", [
+      ["밤비데", "", "무난하게 사용 가능"],
+      ["포프베베", "", "세면대에 안 맞을 때 대안. 밤비데보다 더 좋아 보인다는 후기"]
+    ]],
     ["위생·케어", "아기 수영 목튜브", 1, "선택", "", "생후 50일쯤부터 사용 가능. 욕조 물놀이용으로 좋아하는 편"],
     ["위생·케어", "목욕타올", 1, "필수", 35063, "추천: 밤부베베. 신생아 땐 천기저귀로 대체 가능, 이후 수건 사용"],
     ["위생·케어", "기저귀 갈이대", 1, "필수", 98000, "예: 예꼬맘. 중간 수납칸 사용성은 아쉬운 편이라는 후기"],
@@ -747,14 +793,19 @@
     ["집안 준비", "아기 옷 건조대", 1, "선택", "", ""],
     ["집안 준비", "산모 도우미/방문 일정 조율", 1, "필수", "", "친정·시댁과 일정 미리 협의"]
   ].map(function (row, i) {
+    var brands = row[6] ? row[6].map(function (b) {
+      return { name: b[0], cost: b[1] === "" ? null : Number(b[1]), note: b[2] };
+    }) : null;
     return {
       id: "seed-" + i,
       category: row[0],
       name: row[1],
       qty: row[2],
       priority: row[3],
-      cost: row[4] === "" ? null : Number(row[4]),
+      cost: brands ? brands[0].cost : (row[4] === "" ? null : Number(row[4])),
       note: row[5],
+      brands: brands,
+      brandIndex: 0,
       done: false
     };
   });
@@ -876,6 +927,33 @@
           nameWrap.appendChild(noteEl);
         }
 
+        if (item.brands) {
+          var brandSelect = document.createElement("select");
+          brandSelect.className = "brand-select";
+          item.brands.forEach(function (b, bi) {
+            var opt = document.createElement("option");
+            opt.value = bi;
+            opt.textContent = b.name;
+            if (bi === item.brandIndex) opt.selected = true;
+            brandSelect.appendChild(opt);
+          });
+          brandSelect.addEventListener("change", function () {
+            item.brandIndex = parseInt(brandSelect.value, 10);
+            item.cost = item.brands[item.brandIndex].cost;
+            save();
+            renderAll();
+          });
+          nameWrap.appendChild(brandSelect);
+
+          var brandNote = item.brands[item.brandIndex].note;
+          if (brandNote) {
+            var brandNoteEl = document.createElement("span");
+            brandNoteEl.className = "brand-note";
+            brandNoteEl.textContent = "💡 " + brandNote;
+            nameWrap.appendChild(brandNoteEl);
+          }
+        }
+
         var qtyEl = document.createElement("div");
         qtyEl.className = "item-qty";
         qtyEl.textContent = "x" + item.qty;
@@ -895,6 +973,7 @@
         costInput.addEventListener("change", function () {
           var v = parseInt(costInput.value, 10);
           item.cost = isNaN(v) ? null : v;
+          if (item.brands) item.brands[item.brandIndex].cost = item.cost;
           save();
           renderStats();
         });
