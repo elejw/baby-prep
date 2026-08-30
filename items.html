@@ -160,6 +160,16 @@
     font-size: 16px;
   }
 
+  .sync-status {
+    margin-top: 8px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--ink-faint);
+    min-height: 16px;
+  }
+
+  .sync-status.sync-error { color: var(--danger); }
+
   /* ---------- progress ---------- */
 
   .progress-panel {
@@ -404,6 +414,24 @@
   .status-select.status-bought { background: var(--accent-soft); color: var(--accent-strong); }
   .status-select.status-skip { background: var(--surface-alt); color: var(--ink-faint); }
   .status-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .buy-method-select {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    color: var(--ink-faint);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px 5px;
+    cursor: pointer;
+    text-align: center;
+    text-align-last: center;
+  }
+
+  .buy-method-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
   .item-name { font-weight: 500; }
   .item-note { display: block; color: var(--ink-soft); font-size: 12.5px; margin-top: 2px; font-weight: 400; }
@@ -662,7 +690,8 @@
   <header class="hero">
     <div class="eyebrow">전체 준비물 관리</div>
     <h1>준비물 체크리스트</h1>
-    <p class="sub">장비·의류·침구·수유·위생·장난감(아기용품)부터 병원가방, 산모 회복 용품, 집안 준비까지 — 실제로 아기를 키워본 분의 후기와 브랜드·가격 정보를 반영했습니다. 구매완료·구매예정·구매 안함 상태 표시, 수량·비용 메모, 새 항목 추가가 모두 이 브라우저에 저장됩니다.</p>
+    <p class="sub">장비·의류·침구·수유·위생·장난감(아기용품)부터 병원가방, 산모 회복 용품, 집안 준비까지 — 실제로 아기를 키워본 분의 후기와 브랜드·가격 정보를 반영했습니다. 구매완료·구매예정·구매 안함 상태 표시, 구매방식(새상품/중고/선물), 수량·비용 메모가 GitHub 저장소에 공유 저장됩니다.</p>
+    <p class="sync-status" id="sync-status"></p>
   </header>
 
   <div class="progress-panel">
@@ -758,7 +787,7 @@
 
 <script>
 (function () {
-  var STORAGE_KEY = "birth-prep-items-v12";
+  var STORAGE_KEY = "birth-prep-items-v13";
   var CATEGORIES = ["장비", "아기 의류", "침구", "수유용품", "위생·케어", "장난감·발달", "병원 가방", "산모 회복 용품", "집안 준비", "기타"];
 
   var defaults = [
@@ -1078,7 +1107,8 @@
       note: row[5],
       brands: brands,
       brandIndex: 0,
-      status: "planned"
+      status: "planned",
+      buyMethod: "new"
     };
   });
 
@@ -1093,8 +1123,103 @@
   var activeFilter = "전체";
   var onlyPlanned = false;
 
+  var GITHUB_OWNER = "elejw";
+  var GITHUB_REPO_NAME = "baby-prep";
+  var GITHUB_FILE_PATH = "data/items-state.json";
+  var GITHUB_BRANCH = "main";
+  var GITHUB_TOKEN = "__GITHUB_TOKEN__";
+  var githubSha = null;
+  var githubSyncTimer = null;
+
+  function githubApiUrl() {
+    return "https://api.github.com/repos/" + GITHUB_OWNER + "/" + GITHUB_REPO_NAME + "/contents/" + GITHUB_FILE_PATH;
+  }
+
+  function b64EncodeUnicode(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+
+  function b64DecodeUnicode(str) {
+    return decodeURIComponent(escape(atob(str)));
+  }
+
+  function setSyncStatus(text, isError) {
+    var el = document.getElementById("sync-status");
+    if (!el) return;
+    el.textContent = text;
+    el.className = "sync-status" + (isError ? " sync-error" : "");
+  }
+
+  function loadFromGitHub() {
+    if (!GITHUB_TOKEN || GITHUB_TOKEN.indexOf("__GITHUB_TOKEN__") === 0) return;
+    setSyncStatus("☁️ 공유 데이터 불러오는 중...");
+    fetch(githubApiUrl() + "?ref=" + GITHUB_BRANCH, {
+      headers: {
+        "Authorization": "token " + GITHUB_TOKEN,
+        "Accept": "application/vnd.github+json"
+      }
+    }).then(function (res) {
+      if (res.status === 404) {
+        setSyncStatus("☁️ 아직 공유 데이터 없음 (다음 변경 시 새로 생성됩니다)");
+        return null;
+      }
+      if (!res.ok) throw new Error("load failed: " + res.status);
+      return res.json();
+    }).then(function (data) {
+      if (!data) return;
+      githubSha = data.sha;
+      var decoded = b64DecodeUnicode(data.content.replace(/\n/g, ""));
+      var remoteItems = JSON.parse(decoded);
+      if (Array.isArray(remoteItems)) {
+        items = remoteItems;
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch (e) {}
+        renderAll();
+        setSyncStatus("☁️ 공유 데이터 불러옴 · " + new Date().toLocaleTimeString("ko-KR"));
+      }
+    }).catch(function () {
+      setSyncStatus("⚠️ 공유 데이터 불러오기 실패 (이 브라우저 데이터로 표시 중)", true);
+    });
+  }
+
+  function pushToGitHub() {
+    if (!GITHUB_TOKEN || GITHUB_TOKEN.indexOf("__GITHUB_TOKEN__") === 0) return;
+    setSyncStatus("☁️ 저장 중...");
+    var body = {
+      message: "체크리스트 업데이트 " + new Date().toISOString(),
+      content: b64EncodeUnicode(JSON.stringify(items, null, 2)),
+      branch: GITHUB_BRANCH
+    };
+    if (githubSha) body.sha = githubSha;
+    fetch(githubApiUrl(), {
+      method: "PUT",
+      headers: {
+        "Authorization": "token " + GITHUB_TOKEN,
+        "Accept": "application/vnd.github+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    }).then(function (res) {
+      if (res.status === 409) { loadFromGitHub(); return null; }
+      if (!res.ok) throw new Error("save failed: " + res.status);
+      return res.json();
+    }).then(function (data) {
+      if (data && data.content) {
+        githubSha = data.content.sha;
+        setSyncStatus("☁️ 공유 저장 완료 · " + new Date().toLocaleTimeString("ko-KR"));
+      }
+    }).catch(function () {
+      setSyncStatus("⚠️ 공유 저장 실패 (이 브라우저에는 저장됨)", true);
+    });
+  }
+
+  function scheduleGithubSync() {
+    if (githubSyncTimer) clearTimeout(githubSyncTimer);
+    githubSyncTimer = setTimeout(pushToGitHub, 3000);
+  }
+
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch (e) {}
+    scheduleGithubSync();
   }
 
   function fmtWon(n) {
@@ -1207,6 +1332,21 @@
           renderAll();
         });
         statusCell.appendChild(statusSelect);
+
+        var buyMethodSelect = document.createElement("select");
+        buyMethodSelect.className = "buy-method-select";
+        [["new", "새상품"], ["used", "중고(당근)"], ["gift", "선물/나눔"]].forEach(function (opt) {
+          var o = document.createElement("option");
+          o.value = opt[0];
+          o.textContent = opt[1];
+          if (opt[0] === (item.buyMethod || "new")) o.selected = true;
+          buyMethodSelect.appendChild(o);
+        });
+        buyMethodSelect.addEventListener("change", function () {
+          item.buyMethod = buyMethodSelect.value;
+          save();
+        });
+        statusCell.appendChild(buyMethodSelect);
 
         var nameWrap = document.createElement("div");
         nameWrap.className = "item-name-wrap";
@@ -1354,7 +1494,8 @@
       note: note,
       brands: null,
       brandIndex: 0,
-      status: "planned"
+      status: "planned",
+      buyMethod: "new"
     });
     save();
     e.target.reset();
@@ -1415,5 +1556,6 @@
   });
 
   renderAll();
+  loadFromGitHub();
 })();
 </script>
