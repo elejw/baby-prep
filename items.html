@@ -160,15 +160,36 @@
     font-size: 16px;
   }
 
+  .sync-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
   .sync-status {
-    margin-top: 8px;
+    margin: 0;
     font-family: "IBM Plex Mono", monospace;
     font-size: 12px;
     color: var(--ink-faint);
-    min-height: 16px;
   }
 
   .sync-status.sync-error { color: var(--danger); }
+
+  .sync-settings-btn {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--accent-strong);
+    cursor: pointer;
+  }
+
+  .sync-settings-btn:hover { border-color: var(--accent); }
+  .sync-settings-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* ---------- progress ---------- */
 
@@ -675,6 +696,29 @@
   }
 
   .modal-btn-add:hover { background: var(--accent-strong); }
+
+  .modal-desc {
+    margin: 8px 0 16px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  .modal-hint {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+
+  .link-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .link-row input { flex: 1; min-width: 0; font-size: 12px !important; }
+  .link-row .modal-btn { padding: 8px 12px; }
+
+  .modal-box .field.hidden { display: none; }
 </style>
 
 <div class="page">
@@ -690,8 +734,11 @@
   <header class="hero">
     <div class="eyebrow">전체 준비물 관리</div>
     <h1>준비물 체크리스트</h1>
-    <p class="sub">장비·의류·침구·수유·위생·장난감(아기용품)부터 병원가방, 산모 회복 용품, 집안 준비까지 — 실제로 아기를 키워본 분의 후기와 브랜드·가격 정보를 반영했습니다. 구매완료·구매예정·구매 안함 상태 표시, 구매방식(새상품/중고/선물), 수량·비용 메모가 GitHub 저장소에 공유 저장됩니다.</p>
-    <p class="sync-status" id="sync-status"></p>
+    <p class="sub">장비·의류·침구·수유·위생·장난감(아기용품)부터 병원가방, 산모 회복 용품, 집안 준비까지 — 실제로 아기를 키워본 분의 후기와 브랜드·가격 정보를 반영했습니다. 구매 상태·구매방식·브랜드·비용은 이 브라우저에 저장되고, 동기화를 연결하면 내 GitHub 비공개 저장소에도 저장돼 PC와 모바일에서 같은 내용을 볼 수 있습니다.</p>
+    <div class="sync-row">
+      <p class="sync-status" id="sync-status"></p>
+      <button type="button" class="sync-settings-btn" id="sync-settings-btn">동기화 설정</button>
+    </div>
   </header>
 
   <div class="progress-panel">
@@ -759,9 +806,35 @@
   <div id="item-groups"></div>
 
   <footer>
-    체크·추가·비용 입력은 이 브라우저의 로컬 저장소에만 저장되며 다른 기기와 공유되지 않습니다. 삭제한 항목은 되돌릴 수 없으니 주의해주세요.
+    동기화를 연결하지 않으면 모든 입력은 이 브라우저에만 저장됩니다. 연결하면 변경 3초 뒤 내 비공개 저장소에 자동 저장되고, 다른 기기에서 페이지를 열거나 다시 돌아올 때 최신 내용을 불러옵니다. 삭제한 항목은 저장소 커밋 기록에서만 되살릴 수 있어요.
   </footer>
 
+</div>
+
+<div class="modal-overlay hidden" id="sync-modal-overlay">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="sync-modal-title">
+    <h3 id="sync-modal-title">PC·모바일 동기화</h3>
+    <p class="modal-desc">내 GitHub 비공개 저장소(elejw/baby-prep-data)에 저장해서 어느 기기에서든 같은 내용을 봅니다. 토큰은 이 브라우저에만 보관되고 페이지 코드에는 들어가지 않아요.</p>
+    <form id="sync-modal-form">
+      <div class="field">
+        <label for="sync-token-input">GitHub 토큰</label>
+        <input id="sync-token-input" type="password" placeholder="github_pat_..." autocomplete="off">
+      </div>
+      <div class="field hidden" id="sync-link-field">
+        <label for="sync-link-input">다른 기기 연결 링크</label>
+        <div class="link-row">
+          <input id="sync-link-input" type="text" readonly>
+          <button type="button" class="modal-btn modal-btn-cancel" id="sync-link-copy">복사</button>
+        </div>
+        <p class="modal-hint">이 링크를 폰에서 한 번 열면 바로 연결됩니다. 토큰이 들어있으니 나에게만 보내세요.</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn modal-btn-cancel" id="sync-disconnect">연결 해제</button>
+        <button type="button" class="modal-btn modal-btn-cancel" id="sync-modal-close">닫기</button>
+        <button type="submit" class="modal-btn modal-btn-add">연결</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <div class="modal-overlay hidden" id="brand-modal-overlay">
@@ -1125,12 +1198,39 @@
   var onlyPlanned = false;
 
   var GITHUB_OWNER = "elejw";
-  var GITHUB_REPO_NAME = "baby-prep";
-  var GITHUB_FILE_PATH = "data/items-state.json";
+  var GITHUB_REPO_NAME = "baby-prep-data";
+  var GITHUB_FILE_PATH = "items-state.json";
   var GITHUB_BRANCH = "main";
-  var GITHUB_TOKEN = "";
+  var TOKEN_KEY = "birth-prep-github-token";
+  var GITHUB_TOKEN = readToken();
   var githubSha = null;
   var githubSyncTimer = null;
+  var githubReady = false;
+
+  function readToken() {
+    try {
+      var m = location.hash.match(/(?:^#|&)sync=([^&]+)/);
+      if (m) {
+        var t = decodeURIComponent(m[1]);
+        localStorage.setItem(TOKEN_KEY, t);
+        history.replaceState(null, "", location.pathname + location.search);
+        return t;
+      }
+      return localStorage.getItem(TOKEN_KEY) || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function setToken(t) {
+    GITHUB_TOKEN = t;
+    githubSha = null;
+    githubReady = false;
+    try {
+      if (t) localStorage.setItem(TOKEN_KEY, t);
+      else localStorage.removeItem(TOKEN_KEY);
+    } catch (e) {}
+  }
 
   function githubApiUrl() {
     return "https://api.github.com/repos/" + GITHUB_OWNER + "/" + GITHUB_REPO_NAME + "/contents/" + GITHUB_FILE_PATH;
@@ -1151,17 +1251,27 @@
     el.className = "sync-status" + (isError ? " sync-error" : "");
   }
 
+  function showSyncOff() {
+    setSyncStatus("☁️ 동기화 꺼짐 · 이 브라우저에만 저장 중");
+  }
+
   function loadFromGitHub() {
-    if (!GITHUB_TOKEN || GITHUB_TOKEN.indexOf("__GITHUB_TOKEN__") === 0) return;
-    setSyncStatus("☁️ 공유 데이터 불러오는 중...");
+    if (!GITHUB_TOKEN) { showSyncOff(); return; }
+    setSyncStatus("☁️ 내 저장소에서 불러오는 중...");
     fetch(githubApiUrl() + "?ref=" + GITHUB_BRANCH, {
+      cache: "no-store",
       headers: {
-        "Authorization": "token " + GITHUB_TOKEN,
+        "Authorization": "Bearer " + GITHUB_TOKEN,
         "Accept": "application/vnd.github+json"
       }
     }).then(function (res) {
+      if (res.status === 401 || res.status === 403) {
+        setSyncStatus("⚠️ 토큰이 유효하지 않아요 · 동기화 설정에서 다시 입력해주세요", true);
+        return null;
+      }
       if (res.status === 404) {
-        setSyncStatus("☁️ 아직 공유 데이터 없음 (다음 변경 시 새로 생성됩니다)");
+        githubReady = true;
+        pushToGitHub();
         return null;
       }
       if (!res.ok) throw new Error("load failed: " + res.status);
@@ -1169,21 +1279,21 @@
     }).then(function (data) {
       if (!data) return;
       githubSha = data.sha;
-      var decoded = b64DecodeUnicode(data.content.replace(/\n/g, ""));
-      var remoteItems = JSON.parse(decoded);
+      githubReady = true;
+      var remoteItems = JSON.parse(b64DecodeUnicode(data.content.replace(/\n/g, "")));
       if (Array.isArray(remoteItems)) {
         items = remoteItems;
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch (e) {}
         renderAll();
-        setSyncStatus("☁️ 공유 데이터 불러옴 · " + new Date().toLocaleTimeString("ko-KR"));
+        setSyncStatus("☁️ 동기화됨 · " + new Date().toLocaleTimeString("ko-KR"));
       }
     }).catch(function () {
-      setSyncStatus("⚠️ 공유 데이터 불러오기 실패 (이 브라우저 데이터로 표시 중)", true);
+      setSyncStatus("⚠️ 불러오기 실패 · 이 브라우저 데이터로 표시 중", true);
     });
   }
 
   function pushToGitHub() {
-    if (!GITHUB_TOKEN || GITHUB_TOKEN.indexOf("__GITHUB_TOKEN__") === 0) return;
+    if (!GITHUB_TOKEN || !githubReady) return;
     setSyncStatus("☁️ 저장 중...");
     var body = {
       message: "체크리스트 업데이트 " + new Date().toISOString(),
@@ -1194,29 +1304,45 @@
     fetch(githubApiUrl(), {
       method: "PUT",
       headers: {
-        "Authorization": "token " + GITHUB_TOKEN,
+        "Authorization": "Bearer " + GITHUB_TOKEN,
         "Accept": "application/vnd.github+json",
         "Content-Type": "application/json"
       },
       body: JSON.stringify(body)
     }).then(function (res) {
-      if (res.status === 409) { loadFromGitHub(); return null; }
+      if (res.status === 409 || res.status === 422) {
+        setSyncStatus("☁️ 다른 기기에서 바뀐 내용을 불러왔어요 · 방금 변경은 다시 해주세요");
+        loadFromGitHub();
+        return null;
+      }
+      if (res.status === 401 || res.status === 403) {
+        setSyncStatus("⚠️ 토큰이 유효하지 않아요 · 동기화 설정에서 다시 입력해주세요", true);
+        return null;
+      }
       if (!res.ok) throw new Error("save failed: " + res.status);
       return res.json();
     }).then(function (data) {
       if (data && data.content) {
         githubSha = data.content.sha;
-        setSyncStatus("☁️ 공유 저장 완료 · " + new Date().toLocaleTimeString("ko-KR"));
+        setSyncStatus("☁️ 동기화됨 · " + new Date().toLocaleTimeString("ko-KR"));
       }
     }).catch(function () {
-      setSyncStatus("⚠️ 공유 저장 실패 (이 브라우저에는 저장됨)", true);
+      setSyncStatus("⚠️ 저장 실패 · 이 브라우저에는 저장됨", true);
     });
   }
 
   function scheduleGithubSync() {
+    if (!GITHUB_TOKEN || !githubReady) return;
     if (githubSyncTimer) clearTimeout(githubSyncTimer);
-    githubSyncTimer = setTimeout(pushToGitHub, 3000);
+    githubSyncTimer = setTimeout(function () {
+      githubSyncTimer = null;
+      pushToGitHub();
+    }, 3000);
   }
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible" && GITHUB_TOKEN && !githubSyncTimer) loadFromGitHub();
+  });
 
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch (e) {}
@@ -1554,6 +1680,73 @@
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && !modalOverlay.classList.contains("hidden")) closeBrandModal();
+  });
+
+  var syncOverlay = document.getElementById("sync-modal-overlay");
+  var syncForm = document.getElementById("sync-modal-form");
+  var syncTokenInput = document.getElementById("sync-token-input");
+  var syncLinkField = document.getElementById("sync-link-field");
+  var syncLinkInput = document.getElementById("sync-link-input");
+  var syncLinkCopy = document.getElementById("sync-link-copy");
+
+  function syncLink() {
+    return location.origin + location.pathname + "#sync=" + encodeURIComponent(GITHUB_TOKEN);
+  }
+
+  function openSyncModal() {
+    syncTokenInput.value = GITHUB_TOKEN;
+    if (GITHUB_TOKEN) {
+      syncLinkInput.value = syncLink();
+      syncLinkField.classList.remove("hidden");
+    } else {
+      syncLinkField.classList.add("hidden");
+    }
+    syncLinkCopy.textContent = "복사";
+    syncOverlay.classList.remove("hidden");
+    syncTokenInput.focus();
+  }
+
+  function closeSyncModal() {
+    syncOverlay.classList.add("hidden");
+  }
+
+  document.getElementById("sync-settings-btn").addEventListener("click", openSyncModal);
+  document.getElementById("sync-modal-close").addEventListener("click", closeSyncModal);
+  syncOverlay.addEventListener("click", function (e) {
+    if (e.target === syncOverlay) closeSyncModal();
+  });
+
+  syncForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var t = syncTokenInput.value.trim();
+    if (!t) return;
+    setToken(t);
+    closeSyncModal();
+    loadFromGitHub();
+  });
+
+  document.getElementById("sync-disconnect").addEventListener("click", function () {
+    setToken("");
+    closeSyncModal();
+    showSyncOff();
+  });
+
+  syncLinkCopy.addEventListener("click", function () {
+    syncLinkInput.select();
+    var done = function () { syncLinkCopy.textContent = "복사됨"; };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(syncLinkInput.value).then(done, function () {
+        document.execCommand("copy");
+        done();
+      });
+    } else {
+      document.execCommand("copy");
+      done();
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !syncOverlay.classList.contains("hidden")) closeSyncModal();
   });
 
   renderAll();
