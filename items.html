@@ -266,6 +266,53 @@
     margin: 28px 0 20px;
   }
 
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .search-bar + .controls { margin-top: 14px; }
+
+  #item-search {
+    flex: 1;
+    max-width: 440px;
+    min-width: 0;
+    font-family: "Work Sans", sans-serif;
+    font-size: 15px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+  }
+
+  #item-search::placeholder { color: var(--ink-faint); }
+
+  #item-search:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .search-count {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  .search-empty {
+    background: var(--surface);
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    padding: 28px 20px;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
   .chip {
     font-family: "IBM Plex Mono", monospace;
     font-size: 12.5px;
@@ -811,6 +858,11 @@
         <button type="submit" class="add-btn">추가</button>
       </div>
     </form>
+  </div>
+
+  <div class="search-bar">
+    <input type="search" id="item-search" placeholder="용품 검색 · 이름, 브랜드, 메모" aria-label="용품 검색" autocomplete="off">
+    <span class="search-count" id="search-count" aria-live="polite"></span>
   </div>
 
   <div class="controls" id="category-chips"></div>
@@ -1453,16 +1505,29 @@
     });
   }
 
+  function matchesSearch(item) {
+    if (!searchQuery) return true;
+    var hay = [item.name, item.note, item.category];
+    (item.brands || []).forEach(function (b) {
+      if (b.name !== "확정" && b.name !== "미정") hay.push(b.name, b.note);
+    });
+    var text = hay.join(" ").toLowerCase();
+    return searchQuery.split(/\s+/).every(function (t) { return text.indexOf(t) !== -1; });
+  }
+
   function renderGroups() {
     var container = document.getElementById("item-groups");
     container.innerHTML = "";
     var cats = activeFilter === "전체" ? CATEGORIES : [activeFilter];
+    var matchedCount = 0;
 
     cats.forEach(function (cat) {
       var catItems = items.filter(function (i) {
-        return i.category === cat && (!onlyPlanned || i.status === "planned");
+        return i.category === cat && (!onlyPlanned || i.status === "planned") && matchesSearch(i);
       });
       if (items.filter(function (i) { return i.category === cat; }).length === 0) return;
+      if (searchQuery && catItems.length === 0) return;
+      matchedCount += catItems.length;
 
       var section = document.createElement("div");
       section.className = "cat-section";
@@ -1644,7 +1709,33 @@
       section.appendChild(card);
       container.appendChild(section);
     });
+
+    var countEl = document.getElementById("search-count");
+    countEl.textContent = searchQuery ? matchedCount + "개 찾음" : "";
+
+    if (searchQuery && matchedCount === 0) {
+      var none = document.createElement("div");
+      none.className = "search-empty";
+      none.textContent = "'" + searchInput.value.trim() + "'에 맞는 용품이 없어요." +
+        (activeFilter !== "전체" ? " 위에서 '전체'를 선택하면 모든 카테고리에서 찾아요." : "") +
+        (onlyPlanned ? " '구매예정만 보기'를 끄면 다른 상태의 항목도 찾아요." : "");
+      container.appendChild(none);
+    }
   }
+
+  var searchQuery = "";
+  var searchInput = document.getElementById("item-search");
+  searchInput.addEventListener("input", function () {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    renderGroups();
+  });
+  searchInput.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && searchInput.value) {
+      searchInput.value = "";
+      searchQuery = "";
+      renderGroups();
+    }
+  });
 
   function renderAll() {
     renderStats();
