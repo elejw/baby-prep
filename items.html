@@ -331,16 +331,46 @@
     font-weight: 500;
   }
 
-  .hide-toggle {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 13px;
-    color: var(--ink-soft);
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chip-row-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    width: 64px;
+    flex-shrink: 0;
   }
 
-  .hide-toggle input { accent-color: var(--accent); }
+  #category-chips { margin-bottom: 10px; }
+  .status-controls { margin-top: 0; }
+
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1.5px var(--surface);
+  }
+
+  .dot-planned { background: var(--highlight); }
+  .dot-bought { background: var(--accent); }
+  .dot-gift { background: var(--gift); }
+  .dot-skip { background: var(--ink-faint); }
+
+  .chip-count {
+    font-variant-numeric: tabular-nums;
+    opacity: 0.7;
+  }
+
+  @media (max-width: 620px) {
+    .chip-row-label { width: 100%; }
+  }
 
   /* ---------- add form ---------- */
 
@@ -866,6 +896,7 @@
   </div>
 
   <div class="controls" id="category-chips"></div>
+  <div class="controls status-controls" id="status-chips"></div>
 
   <div id="item-groups"></div>
 
@@ -1259,7 +1290,14 @@
   }
 
   var activeFilter = "전체";
-  var onlyPlanned = false;
+  var activeStatus = "all";
+  var STATUS_FILTERS = [
+    ["all", "전체 상태"],
+    ["planned", "구매예정"],
+    ["bought", "구매완료"],
+    ["gift", "선물받음"],
+    ["skip", "구매 안함"]
+  ];
 
   var GITHUB_OWNER = "elejw";
   var GITHUB_REPO_NAME = "baby-prep-data";
@@ -1479,14 +1517,23 @@
     document.getElementById("progress-caption").textContent = ready + " / " + denom + " 준비완료 (구매완료+선물받음, 구매 안함 " + skip.length + "개 제외, " + pct + "%)";
   }
 
+  function chipLabel(text) {
+    var span = document.createElement("span");
+    span.className = "chip-row-label";
+    span.textContent = text;
+    return span;
+  }
+
   function renderChips() {
     var wrap = document.getElementById("category-chips");
     wrap.innerHTML = "";
+    wrap.appendChild(chipLabel("카테고리"));
     var cats = ["전체"].concat(CATEGORIES);
     cats.forEach(function (cat) {
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "chip" + (cat === activeFilter ? " active" : "");
+      btn.setAttribute("aria-pressed", cat === activeFilter ? "true" : "false");
       btn.textContent = cat;
       btn.addEventListener("click", function () {
         activeFilter = cat;
@@ -1494,14 +1541,40 @@
       });
       wrap.appendChild(btn);
     });
-    var hideWrap = document.createElement("label");
-    hideWrap.className = "hide-toggle";
-    hideWrap.innerHTML = '<input type="checkbox" id="hide-done-toggle"> 구매예정만 보기';
-    wrap.appendChild(hideWrap);
-    document.getElementById("hide-done-toggle").checked = onlyPlanned;
-    document.getElementById("hide-done-toggle").addEventListener("change", function (e) {
-      onlyPlanned = e.target.checked;
-      renderAll();
+  }
+
+  function matchesStatus(item) {
+    return activeStatus === "all" || item.status === activeStatus;
+  }
+
+  function renderStatusChips() {
+    var wrap = document.getElementById("status-chips");
+    wrap.innerHTML = "";
+    wrap.appendChild(chipLabel("상태"));
+    var pool = items.filter(function (i) {
+      return (activeFilter === "전체" || i.category === activeFilter) && matchesSearch(i);
+    });
+    STATUS_FILTERS.forEach(function (s) {
+      var count = s[0] === "all" ? pool.length : pool.filter(function (i) { return i.status === s[0]; }).length;
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip status-chip" + (s[0] === activeStatus ? " active" : "");
+      btn.setAttribute("aria-pressed", s[0] === activeStatus ? "true" : "false");
+      if (s[0] !== "all") {
+        var dot = document.createElement("span");
+        dot.className = "status-dot dot-" + s[0];
+        btn.appendChild(dot);
+      }
+      btn.appendChild(document.createTextNode(s[1] + " "));
+      var num = document.createElement("span");
+      num.className = "chip-count";
+      num.textContent = count;
+      btn.appendChild(num);
+      btn.addEventListener("click", function () {
+        activeStatus = s[0];
+        renderGroups();
+      });
+      wrap.appendChild(btn);
     });
   }
 
@@ -1516,17 +1589,19 @@
   }
 
   function renderGroups() {
+    renderStatusChips();
     var container = document.getElementById("item-groups");
     container.innerHTML = "";
     var cats = activeFilter === "전체" ? CATEGORIES : [activeFilter];
+    var narrowing = !!searchQuery || activeStatus !== "all";
     var matchedCount = 0;
 
     cats.forEach(function (cat) {
       var catItems = items.filter(function (i) {
-        return i.category === cat && (!onlyPlanned || i.status === "planned") && matchesSearch(i);
+        return i.category === cat && matchesStatus(i) && matchesSearch(i);
       });
       if (items.filter(function (i) { return i.category === cat; }).length === 0) return;
-      if (searchQuery && catItems.length === 0) return;
+      if (narrowing && catItems.length === 0) return;
       matchedCount += catItems.length;
 
       var section = document.createElement("div");
@@ -1713,12 +1788,15 @@
     var countEl = document.getElementById("search-count");
     countEl.textContent = searchQuery ? matchedCount + "개 찾음" : "";
 
-    if (searchQuery && matchedCount === 0) {
+    if (narrowing && matchedCount === 0) {
+      var statusLabel = "";
+      STATUS_FILTERS.forEach(function (s) { if (s[0] === activeStatus) statusLabel = s[1]; });
       var none = document.createElement("div");
       none.className = "search-empty";
-      none.textContent = "'" + searchInput.value.trim() + "'에 맞는 용품이 없어요." +
-        (activeFilter !== "전체" ? " 위에서 '전체'를 선택하면 모든 카테고리에서 찾아요." : "") +
-        (onlyPlanned ? " '구매예정만 보기'를 끄면 다른 상태의 항목도 찾아요." : "");
+      none.textContent = (searchQuery ? "'" + searchInput.value.trim() + "'에 맞는 " : "") +
+        (activeStatus !== "all" ? "'" + statusLabel + "' 상태인 " : "") + "용품이 없어요." +
+        (activeFilter !== "전체" ? " 카테고리를 '전체'로 바꾸면 모든 카테고리에서 찾아요." : "") +
+        (searchQuery && activeStatus !== "all" ? " 상태를 '전체 상태'로 바꾸면 다른 상태의 항목도 찾아요." : "");
       container.appendChild(none);
     }
   }
