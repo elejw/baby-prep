@@ -1277,13 +1277,16 @@
         "Accept": "application/vnd.github+json"
       }
     }).then(function (res) {
-      if (res.status === 401 || res.status === 403) {
-        setSyncStatus("⚠️ 토큰이 유효하지 않아요 · 동기화 설정에서 다시 입력해주세요", true);
+      if (res.status === 401) {
+        setSyncStatus("⚠️ 토큰이 유효하지 않거나 만료됐어요 · 동기화 설정에서 다시 입력해주세요", true);
+        return null;
+      }
+      if (res.status === 403) {
+        setSyncStatus("⚠️ 토큰에 저장소 읽기 권한이 없어요 · Contents 권한을 확인해주세요", true);
         return null;
       }
       if (res.status === 404) {
-        githubReady = true;
-        pushToGitHub();
+        checkRepoAccessThenCreate();
         return null;
       }
       if (!res.ok) throw new Error("load failed: " + res.status);
@@ -1301,6 +1304,29 @@
       }
     }).catch(function () {
       setSyncStatus("⚠️ 불러오기 실패 · 이 브라우저 데이터로 표시 중", true);
+    });
+  }
+
+  function checkRepoAccessThenCreate() {
+    fetch("https://api.github.com/repos/" + GITHUB_OWNER + "/" + GITHUB_REPO_NAME, {
+      cache: "no-store",
+      headers: {
+        "Authorization": "Bearer " + GITHUB_TOKEN,
+        "Accept": "application/vnd.github+json"
+      }
+    }).then(function (res) {
+      if (res.status === 404) {
+        setSyncStatus("⚠️ 이 토큰은 " + GITHUB_REPO_NAME + " 저장소에 접근할 수 없어요 · 토큰의 Repository access에 " + GITHUB_REPO_NAME + "를 추가해주세요", true);
+        return;
+      }
+      if (!res.ok) {
+        setSyncStatus("⚠️ 저장소 확인 실패 (HTTP " + res.status + ")", true);
+        return;
+      }
+      githubReady = true;
+      pushToGitHub();
+    }).catch(function () {
+      setSyncStatus("⚠️ 저장소 확인 실패 · 네트워크를 확인해주세요", true);
     });
   }
 
@@ -1327,11 +1353,22 @@
         loadFromGitHub();
         return null;
       }
-      if (res.status === 401 || res.status === 403) {
-        setSyncStatus("⚠️ 토큰이 유효하지 않아요 · 동기화 설정에서 다시 입력해주세요", true);
+      if (res.status === 401) {
+        setSyncStatus("⚠️ 토큰이 유효하지 않거나 만료됐어요 · 동기화 설정에서 다시 입력해주세요", true);
         return null;
       }
-      if (!res.ok) throw new Error("save failed: " + res.status);
+      if (res.status === 403) {
+        setSyncStatus("⚠️ 토큰에 쓰기 권한이 없어요 · Contents를 'Read and write'로 바꿔주세요", true);
+        return null;
+      }
+      if (res.status === 404) {
+        setSyncStatus("⚠️ 이 토큰은 " + GITHUB_REPO_NAME + " 저장소에 접근할 수 없어요 · 토큰의 Repository access를 확인해주세요", true);
+        return null;
+      }
+      if (!res.ok) {
+        setSyncStatus("⚠️ 저장 실패 (HTTP " + res.status + ") · 이 브라우저에는 저장됨", true);
+        return null;
+      }
       return res.json();
     }).then(function (data) {
       if (data && data.content) {
@@ -1339,7 +1376,7 @@
         setSyncStatus("☁️ 동기화됨 · " + new Date().toLocaleTimeString("ko-KR"));
       }
     }).catch(function () {
-      setSyncStatus("⚠️ 저장 실패 · 이 브라우저에는 저장됨", true);
+      setSyncStatus("⚠️ 저장 실패 · 네트워크 오류 (이 브라우저에는 저장됨)", true);
     });
   }
 
