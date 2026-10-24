@@ -20,6 +20,8 @@
     --highlight-soft: #f3e2c9;
     --danger: #b6482f;
     --danger-soft: #f5e0d8;
+    --gift: #9c4d74;
+    --gift-soft: #f3e0ea;
     --shadow: 0 1px 2px rgba(34,38,31,0.06), 0 8px 24px -12px rgba(34,38,31,0.18);
   }
 
@@ -39,6 +41,8 @@
       --highlight-soft: #382a1a;
       --danger: #e08668;
       --danger-soft: #392620;
+      --gift: #e3a0c2;
+      --gift-soft: #3a2230;
       --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
     }
   }
@@ -58,6 +62,8 @@
     --highlight-soft: #382a1a;
     --danger: #e08668;
     --danger-soft: #392620;
+      --gift: #e3a0c2;
+      --gift-soft: #3a2230;
     --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
   }
 
@@ -216,6 +222,7 @@
   .progress-stat .num.status-bought { color: var(--accent-strong); }
   .progress-stat .num.status-planned { color: var(--highlight); }
   .progress-stat .num.status-skip { color: var(--ink-faint); }
+  .progress-stat .num.status-gift { color: var(--gift); }
 
   .progress-stat .label {
     font-size: 12.5px;
@@ -415,6 +422,9 @@
 
   .item-row.status-bought .item-name { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--line); }
 
+  .item-row.status-gift { background: var(--surface-alt); }
+  .item-row.status-gift .item-name { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--line); }
+
   .item-row.status-skip { opacity: 0.55; }
   .item-row.status-skip .item-name { font-style: italic; }
 
@@ -434,6 +444,7 @@
   .status-select.status-planned { background: var(--highlight-soft); color: var(--highlight); }
   .status-select.status-bought { background: var(--accent-soft); color: var(--accent-strong); }
   .status-select.status-skip { background: var(--surface-alt); color: var(--ink-faint); }
+  .status-select.status-gift { background: var(--gift-soft); color: var(--gift); }
   .status-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
   .buy-method-select {
@@ -744,6 +755,7 @@
   <div class="progress-panel">
     <div class="progress-stat"><div class="num" id="stat-total">0</div><div class="label">전체 항목</div></div>
     <div class="progress-stat"><div class="num status-bought" id="stat-bought">0</div><div class="label">구매완료</div></div>
+    <div class="progress-stat"><div class="num status-gift" id="stat-gift">0</div><div class="label">선물받음</div></div>
     <div class="progress-stat"><div class="num status-planned" id="stat-planned">0</div><div class="label">구매예정</div></div>
     <div class="progress-stat"><div class="num status-skip" id="stat-skip">0</div><div class="label">구매 안함</div></div>
     <div class="progress-stat"><div class="num" id="stat-spent">0원</div><div class="label">이미 지출</div></div>
@@ -1359,20 +1371,23 @@
     var bought = items.filter(function (i) { return i.status === "bought"; });
     var planned = items.filter(function (i) { return i.status === "planned"; });
     var skip = items.filter(function (i) { return i.status === "skip"; });
+    var gift = items.filter(function (i) { return i.status === "gift"; });
     var spent = bought.reduce(function (sum, i) { return sum + (i.cost || 0) * (i.qty || 1); }, 0);
     var remaining = planned.reduce(function (sum, i) { return sum + (i.cost || 0) * (i.qty || 1); }, 0);
 
     document.getElementById("stat-total").textContent = total;
     document.getElementById("stat-bought").textContent = bought.length;
+    document.getElementById("stat-gift").textContent = gift.length;
     document.getElementById("stat-planned").textContent = planned.length;
     document.getElementById("stat-skip").textContent = skip.length;
     document.getElementById("stat-spent").textContent = spent.toLocaleString("ko-KR") + "원";
     document.getElementById("stat-remaining").textContent = remaining.toLocaleString("ko-KR") + "원";
 
+    var ready = bought.length + gift.length;
     var denom = total - skip.length;
-    var pct = denom ? Math.round((bought.length / denom) * 100) : 0;
+    var pct = denom ? Math.round((ready / denom) * 100) : 0;
     document.getElementById("progress-fill").style.width = pct + "%";
-    document.getElementById("progress-caption").textContent = bought.length + " / " + denom + " 구매완료 (구매 안함 " + skip.length + "개 제외, " + pct + "%)";
+    document.getElementById("progress-caption").textContent = ready + " / " + denom + " 준비완료 (구매완료+선물받음, 구매 안함 " + skip.length + "개 제외, " + pct + "%)";
   }
 
   function renderChips() {
@@ -1415,12 +1430,12 @@
       var section = document.createElement("div");
       section.className = "cat-section";
 
-      var boughtInCat = items.filter(function (i) { return i.category === cat && i.status === "bought"; }).length;
+      var boughtInCat = items.filter(function (i) { return i.category === cat && (i.status === "bought" || i.status === "gift"); }).length;
       var totalInCat = items.filter(function (i) { return i.category === cat; }).length;
 
       var titleHtml = document.createElement("div");
       titleHtml.className = "cat-title";
-      titleHtml.innerHTML = cat + ' <span class="count">' + boughtInCat + ' / ' + totalInCat + ' 구매완료</span>';
+      titleHtml.innerHTML = cat + ' <span class="count">' + boughtInCat + ' / ' + totalInCat + ' 준비완료</span>';
       section.appendChild(titleHtml);
 
       var card = document.createElement("div");
@@ -1446,7 +1461,7 @@
         statusCell.className = "item-status-cell";
         var statusSelect = document.createElement("select");
         statusSelect.className = "status-select status-" + item.status;
-        [["planned", "구매예정"], ["bought", "구매완료"], ["skip", "구매 안함"]].forEach(function (opt) {
+        [["planned", "구매예정"], ["bought", "구매완료"], ["gift", "선물받음"], ["skip", "구매 안함"]].forEach(function (opt) {
           var o = document.createElement("option");
           o.value = opt[0];
           o.textContent = opt[1];
@@ -1473,7 +1488,7 @@
           item.buyMethod = buyMethodSelect.value;
           save();
         });
-        statusCell.appendChild(buyMethodSelect);
+        if (item.status !== "gift") statusCell.appendChild(buyMethodSelect);
 
         var nameWrap = document.createElement("div");
         nameWrap.className = "item-name-wrap";
